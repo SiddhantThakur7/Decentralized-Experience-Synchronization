@@ -71,16 +71,16 @@ The primary has information about currently joined peers, every time a new peer 
 
 primary = p
 States
-[] -> no peers, topology is complete (p1)
-[p1] -> p1 connects to p. No peers joined before p1, topology is complete ((p,p1))
-[p1, p2] -> p2 connects to p. p1 joined before p2, topology is incomplete ((p, p1), (p, p2))
+- [] -> no peers, topology is complete (p1)
+- [p1] -> p1 connects to p. No peers joined before p1, topology is complete ((p,p1))
+- [p1, p2] -> p2 connects to p. p1 joined before p2, topology is incomplete ((p, p1), (p, p2))
     p requests offer from p2 and sends to p1 and requests an answer from p1 and sends to p2.
     topology complete ((p, p1), (p, p2), (p1, p2))
-[p1, p2, p3] -> p3 connects to p. p1, p2 joined before p3, topology is incomplete ((p, p1), (p, p2), (p1, p2), (p, p3))
+- [p1, p2, p3] -> p3 connects to p. p1, p2 joined before p3, topology is incomplete ((p, p1), (p, p2), (p1, p2), (p, p3))
     p requests offers for both p1 & p2 from p3 and sends answers from p1 & p2 to p3.
     topology complete ((p, p1), (p, p2), (p1, p2), (p, p3), (p1, p3), (p2, p3))
 
-Total Number of connections = Total Number of data channels => NC2 where N is the number of clients
-2C2 = 1; 3C2 = 3, 4C2 = 6
-Total Number of socket connections = 1 from N
-Number of server events = N + 1 => 1 event for offer accumulation, and N events for answer communication and handshaking completion
+Total Number of connections = Total Number of data channels => NC2 where N is the number of clients <br/>
+2C2 = 1; 3C2 = 3, 4C2 = 6 <br/>
+Total Number of socket connections = 1 from N <br/>
+Number of server events = N + 1 => 1 event for offer accumulation, and N events for answer communication and handshaking completion <br/>
