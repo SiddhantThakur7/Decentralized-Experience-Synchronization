@@ -1,7 +1,9 @@
 // NetflixPlayer.js
 class NetflixPlayer {
-    #playingStateChangeAction = () => pass;
-    #seekAction = () => pass;
+    #actor = true;
+    #playingStateChangeAction = () => null;
+    #seekAction = () => null;
+    #postEventAction = () => null;
     #player;
     #playerWrapper;
 
@@ -27,12 +29,15 @@ class NetflixPlayer {
                 return result;
             await this.#sleep(i * 500);
         }
-        console.log("Done");
+        console.log("All retry attempts exhausted!");
     }
 
     #sleep = (ms) => {
-        console.log('#sleep called');
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    #unsetActor = () => {
+        this.#actor = false;
     }
 
     // publicly accessible methods
@@ -43,15 +48,31 @@ class NetflixPlayer {
     }
 
     setplayingStateChangeAction = (action) => {
-        this.#playingStateChangeAction = action;
+        this.#playingStateChangeAction = () => {
+            action();
+            if (this.#actor) {
+                this.#postEventAction();
+            }
+            this.#actor = true;
+        };
     }
 
     setseekAction = (action) => {
-        this.#seekAction = action;
+        this.#seekAction = () => {
+            action();
+            if (this.#actor) {
+                this.#postEventAction();
+            }
+            this.#actor = true;
+        };
     }
 
     setplayingStateChangeListener = () => {
         this.#player.addEventListener('playingchanged', this.#playingStateChangeAction);
+    }
+
+    setPostEventAction = (action) => {
+        this.#postEventAction = action;
     }
 
     setSeekListener = () => {
@@ -59,14 +80,17 @@ class NetflixPlayer {
     }
 
     seekTo = (timestamp) => {
+        this.#unsetActor()
         return this.#player.seek(timestamp);
     }
 
     play = () => {
+        this.#unsetActor()
         return this.#player.play();
     }
 
     pause = () => {
+        this.#unsetActor()
         return this.#player.pause();
     }
 

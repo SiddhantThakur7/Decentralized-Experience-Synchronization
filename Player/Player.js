@@ -24,8 +24,12 @@ class Player {
         this.#player.setSeekListener();
     }
 
+    setPostEventAction = (action) => {
+        this.#player.setPostEventAction(action);
+    }
+
     seekTo = (timestamp) => {
-        return this.#player.seek(timestamp);
+        return this.#player.seekTo(timestamp);
     }
 
     play = () => {

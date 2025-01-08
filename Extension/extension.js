@@ -5,7 +5,6 @@ var statusDisplay = null;
 var connectionForm = null;
 var answer = null;
 var channel = null;
-var isActor = true;
 
 const servers = {
   iceServers: [
@@ -26,12 +25,17 @@ chrome.runtime.onConnect.addListener(function (port) {
 
 chrome.runtime.onConnectExternal.addListener(function (port) {
   webpageConnection = port;
-  port.onMessage.addListener(function (msg) {
-    console.log("Webpage: ", msg, isActor, channel);
-    statusDisplay.innerHTML = `Status: ${msg.status ? "Paused" : "Playing"}`;
-    if (channel && isActor)
-      channel.send(JSON.stringify({ message: "Status Changed" }));
-    isActor = true;
+  port.onMessage.addListener(function (evt) {
+    console.log("Webpage Message: ", evt);
+    statusDisplay.innerHTML = `Status: ${!evt.playState ? "Paused" : "Playing"}`;
+    if (channel)
+      channel.send(
+        JSON.stringify({
+          event: evt.event,
+          playState: evt.playState,
+          timestamp: evt.timestamp
+        })
+      )
   });
 });
 
@@ -42,7 +46,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (button) {
     button.addEventListener("click", () => {
       console.log("Button Clicked 1", contentScriptConnection, statusDisplay);
-      contentScriptConnection.postMessage("play/pause");
+      contentScriptConnection.postMessage(
+        JSON.stringify({
+          event: Constants.REMOTE_STREAM_MANIPULATED_EVENT,
+          playState: false,
+          timestamp: 10000
+        }));
     });
   } else {
     console.error("Button with ID 'testButton' not found.");
@@ -108,11 +117,16 @@ function makeDataChannel() {
     connectionForm.style.display = "none";
   };
   channel.onmessage = function (evt) {
-    data = JSON.parse(evt.data);
-    console.log("Message recieved: ", data);
+    eventData = JSON.parse(evt.data);
+    console.log("Message recieved: ", eventData);
     if (data.message == "Changed Status")
-      contentScriptConnection.postMessage("play/pause");
-    isActor = false;
+      contentScriptConnection.postMessage(
+        JSON.stringify({
+          event: Constants.REMOTE_STREAM_MANIPULATED_EVENT,
+          playState: eventData.playState,
+          timestamp: eventData.timestamp
+        })
+      );
   };
   channel.onerror = error => console.log(error);
 }
@@ -126,12 +140,15 @@ function handleDataChannel() {
       console.log("Channel found: ", channel);
     };
     channel.onmessage = function (evt) {
-      isActor = false;
-      data = JSON.parse(evt.data);
-      console.log("Message recieved: ", data, contentScriptConnection);
+      eventData = JSON.parse(evt.data);
+      console.log("Message recieved: ", eventData, contentScriptConnection);
       if (data.message == "Status Changed")
-        contentScriptConnection.postMessage("play/pause");
-      isActor = false;
+        contentScriptConnection.postMessage(
+          JSON.stringify({
+            event: Constants.REMOTE_STREAM_MANIPULATED_EVENT,
+            playState: eventData.playState,
+            timestamp: eventData.timestamp
+          }));
     };
     channel.onerror = error => console.log(error);
   };
