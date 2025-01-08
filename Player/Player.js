@@ -20,7 +20,7 @@ class Player {
     }
 
     setSeekListener = (action) => {
-        this.#player.setplayingSeekAction(action);
+        this.#player.setSeekAction(action);
         this.#player.setSeekListener();
     }
 
