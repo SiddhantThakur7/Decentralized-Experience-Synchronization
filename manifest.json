@@ -1,11 +1,11 @@
 {
-  "name": "Capstone Project",
+  "name": "Synchronize",
   "version": "1.0.0",
   "description": "This is a test chrome extension",
   "manifest_version": 3,
-  "author": "Prathamesh",
+  "author": "Mesh",
   "action": {
-    "default_popup": "index.html",
+    "default_popup": "Client/index.html",
     "default_title": "Capstone Project"
   },
   "content_scripts": [
@@ -15,7 +15,8 @@
         "https://www.youtube.com/*"
       ],
       "js": [
-        "partially-injected.js"
+        "Constants/Constants.js",
+        "Bridge/bridge.js"
       ],
       "run_at": "document_end",
       "all_frames": true
@@ -26,12 +27,12 @@
         "https://www.youtube.com/*"
       ],
       "js": [
-        "injected.js",
-        "NetflixPlayer.js",
-        "YouTubePlayer.js",
-        "Player.js"
+        "Constants/Constants.js",
+        "Player/Platforms/NetflixPlayer.js",
+        "Player/Platforms/YouTubePlayer.js",
+        "Player/Player.js",
+        "Client/client.js"
       ],
-      "run_at": "document_end",
       "all_frames": true,
       "world": "MAIN"
     }

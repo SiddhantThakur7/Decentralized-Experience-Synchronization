@@ -1,13 +1,10 @@
 var videoPlayer = null;
 var player = null;
-var editorExtensionId = "pcmngjiogdapgmdbcfegloonelminlpp";
-var port = chrome.runtime.connect(editorExtensionId, { name: "webpage-youtube" });
-var isActor = true;
+var port = chrome.runtime.connect(Constants.EXTENSION_ID, { name: Constants.EXTENSION_ID });
 
 window.addEventListener("load", async () => {
     player = new Player();
     await player.instantiate();
-    console.log('hiiiii', player, player.currentPlayState());
     port.postMessage({ message: "Connection Established!", status: !player.currentPlayState() });
 
     player.setplayingStateChangeListener((e) => {
@@ -25,7 +22,6 @@ window.addEventListener("load", async () => {
 window.addEventListener(
     "message",
     (event) => {
-        isActor = false;
         console.log("injected", event, player, !player.currentPlayState());
         if (player.currentPlayState()) {
             player.pause();

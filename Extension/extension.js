@@ -10,23 +10,23 @@ var isActor = true;
 const servers = {
   iceServers: [
     {
-      urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"]
+      urls: Constants.STUN_SERVERS
     }
   ],
-  iceCandidatePoolSize: 10
+  iceCandidatePoolSize: Constants.ICE_CANDIDATE_POOL_SIZE
 };
 var pc = null;
 
-chrome.runtime.onConnect.addListener(function(port) {
+chrome.runtime.onConnect.addListener(function (port) {
   contentScriptConnection = port;
-  port.onMessage.addListener(function(msg) {
+  port.onMessage.addListener(function (msg) {
     console.log("Content-Script: ", msg);
   });
 });
 
-chrome.runtime.onConnectExternal.addListener(function(port) {
+chrome.runtime.onConnectExternal.addListener(function (port) {
   webpageConnection = port;
-  port.onMessage.addListener(function(msg) {
+  port.onMessage.addListener(function (msg) {
     console.log("Webpage: ", msg, isActor, channel);
     statusDisplay.innerHTML = `Status: ${msg.status ? "Paused" : "Playing"}`;
     if (channel && isActor)
@@ -52,11 +52,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     .getElementById("create-offer-button")
     .addEventListener("click", createOffer);
   document
-    .getElementById("respond-offer-button-1")
+    .getElementById("respond-offer-button")
     .addEventListener("click", respondToOffer);
-  document
-    .getElementById("respond-offer-button-2")
-    .addEventListener("click", respondToOffer2);
 });
 
 async function createOffer() {
@@ -67,7 +64,7 @@ async function createOffer() {
   const offerDescription = await pc.createOffer();
   await pc.setLocalDescription(offerDescription);
   console.log(pc);
-  pc.onicecandidate = function(candidate) {
+  pc.onicecandidate = function (candidate) {
     if (candidate.candidate == null) {
       console.log("Your offer is:", JSON.stringify(pc.localDescription));
       document.getElementById("local-description").value = JSON.stringify(
@@ -90,30 +87,7 @@ async function respondToOffer() {
   }
   const answerDescription = await pc.createAnswer();
   await pc.setLocalDescription(answerDescription);
-  pc.onicecandidate = function(candidate) {
-    if (candidate.candidate == null) {
-      console.log("answer: ", JSON.stringify(pc.localDescription));
-      document.getElementById("local-description").value = JSON.stringify(
-        pc.localDescription
-      );
-    }
-  };
-}
-
-async function respondToOffer2() {
-  if (!pc) {
-    pc = new RTCPeerConnection(servers);
-  }
-  data = JSON.parse(document.getElementById("remote-description-2").value);
-  sessionDescription = new RTCSessionDescription(data);
-  handleDataChannel();
-  pc.setRemoteDescription(sessionDescription);
-  if (pc.localDescription) {
-    return;
-  }
-  const answerDescription = await pc.createAnswer();
-  await pc.setLocalDescription(answerDescription);
-  pc.onicecandidate = function(candidate) {
+  pc.onicecandidate = function (candidate) {
     if (candidate.candidate == null) {
       console.log("answer: ", JSON.stringify(pc.localDescription));
       document.getElementById("local-description").value = JSON.stringify(
@@ -129,11 +103,11 @@ function makeDataChannel() {
   // afterwards it just stays in "connecting" state forever.  This is
   // my least favorite thing about the datachannel API.
   channel = pc.createDataChannel("test", { reliable: true });
-  channel.onopen = function() {
+  channel.onopen = function () {
     console.log("Channel Created!");
     connectionForm.style.display = "none";
   };
-  channel.onmessage = function(evt) {
+  channel.onmessage = function (evt) {
     data = JSON.parse(evt.data);
     console.log("Message recieved: ", data);
     if (data.message == "Changed Status")
@@ -144,14 +118,14 @@ function makeDataChannel() {
 }
 
 function handleDataChannel() {
-  pc.ondatachannel = function(evt) {
+  pc.ondatachannel = function (evt) {
     channel = evt.channel;
     console.log("Channel found: ", channel, connectionForm);
     connectionForm.style.display = "none";
-    channel.onopen = function() {
+    channel.onopen = function () {
       console.log("Channel found: ", channel);
     };
-    channel.onmessage = function(evt) {
+    channel.onmessage = function (evt) {
       isActor = false;
       data = JSON.parse(evt.data);
       console.log("Message recieved: ", data, contentScriptConnection);
