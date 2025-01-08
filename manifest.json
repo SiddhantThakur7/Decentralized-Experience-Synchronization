@@ -1,0 +1,57 @@
+{
+  "name": "Capstone Project",
+  "version": "1.0.0",
+  "description": "This is a test chrome extension",
+  "manifest_version": 3,
+  "author": "Prathamesh",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Capstone Project"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.netflix.com/*",
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "partially-injected.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://www.netflix.com/*",
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "injected.js",
+        "NetflixPlayer.js",
+        "YouTubePlayer.js",
+        "Player.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": true,
+      "world": "MAIN"
+    }
+  ],
+  "externally_connectable": {
+    "matches": [
+      "https://www.netflix.com/*",
+      "https://www.youtube.com/*"
+    ]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "permissions": [
+    "scripting",
+    "tabs",
+    "notifications",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
