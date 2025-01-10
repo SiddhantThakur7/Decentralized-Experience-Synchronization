@@ -18,7 +18,6 @@
     console.log("Clicked!");
     var sessionId = document.getElementById('sessionId').value;
     const socket = io(`http://localhost:8080/${sessionId}`);
-    console.log(socket);
     socket.on("connection", () => console.log("Connect established!"));
     socket.on("answer", (answer) => console.log("Answer = ", answer));
   }
