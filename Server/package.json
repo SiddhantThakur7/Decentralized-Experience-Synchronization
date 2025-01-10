@@ -1,0 +1,23 @@
+{
+  "name": "p2p-connection-signalling",
+  "version": "1.0.0",
+  "description": "Signalling server for facilitating client p2p connections.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "siddhant thakur",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "redis": "^4.7.0",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.4"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.7"
+  }
+}
