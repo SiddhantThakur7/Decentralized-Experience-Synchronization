@@ -8,13 +8,13 @@ class PeerConnectionEntity {
     servers = {
         iceServers: [
             {
-            urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
+                urls: Constants,
             },
         ],
         iceCandidatePoolSize: 10,
     };
 
-    constructor(isPrimary = false){
+    constructor(isPrimary = false) {
         this.peerConnection = new RTCPeerConnection(servers);
         this.channel = new PeerConnectionChannel();
         this.isPrimary = isPrimary;
@@ -41,7 +41,7 @@ class PeerConnectionEntity {
     }
 
     Answer = async (remoteSdp) => {
-        if (this.peerConnection.remoteDescription){
+        if (this.peerConnection.remoteDescription) {
             return
         }
         const remoteDescription = new RTCSessionDescription(remoteSdp);
@@ -75,18 +75,18 @@ class PeerConnectionEntity {
 class PeerConnectionChannel {
     channel = null;
     #pc = null;
-    #messageAction = () => {};
-    #openingAction = () => {};
+    #messageAction = () => { };
+    #openingAction = () => { };
     #errorAction = (error) => console.log(error);
 
-    constructor (peerConnection) {
+    constructor(peerConnection) {
         this.#pc = peerConnection;
     }
 
     Create = (id, suffix) => {
         this.channel = this.#pc.createDataChannel(
-            `${id}-${suffix}`, 
-            { 
+            `${id}-${suffix}`,
+            {
                 reliable: true
             }
         );

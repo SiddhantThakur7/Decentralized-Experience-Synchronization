@@ -10,7 +10,9 @@ class SessionCreationController {
         const signallingService = req.app.get(Constants.SIGNALLING_SERVICE_INSTANCE);
         var connectionEntityManagementService = new ConnectionEntityManagementService();
         signallingService.createChannel(sessionId, connectionEntityManagementService.manageConnectionRequest);
-        res.status(200).send(sessionId);
+        res.status(200).json({
+            sessionId: sessionId
+        });
     }
 }
 

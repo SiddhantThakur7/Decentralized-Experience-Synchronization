@@ -22,7 +22,10 @@ class ConnectionEntityManagementService {
         offer = new Offer(session.connections[offerIndex].offer, offerIndex);
         session.consumed += 1;
         await this.dataLayer.set(sessionId, session);
-        return offer;
+        return {
+            offer: offer,
+            url: session.url
+        };
     }
 
     manageConnectionResponse = async (sessionId, answer) => {
