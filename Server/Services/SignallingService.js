@@ -21,7 +21,7 @@ class SignallingService {
 
     pushToClient = (sessionId, message) => {
         const socket = this.sessionChannelMap.get(sessionId);
-        socket.emit("answer", message);
+        socket.emit('answer', JSON.stringify(message));
     }
 
 }

@@ -26,8 +26,8 @@ class ConnectionEntityManagementService {
         let offer = null;
         // await this.dataLayer.lock(sessionId);
         const session = await this.dataLayer.get(sessionId);
-        const offerIndex = session.consumed;
-        offer = new Offer(JSON.stringify(session.connections[offerIndex].offer), offerIndex);
+        const offerIndex = session.consumed % 5;
+        offer = new Offer(JSON.parse(session.connections[offerIndex].offer), offerIndex);
         session.consumed += 1;
         await this.dataLayer.set(sessionId, session);
         return {
@@ -38,7 +38,7 @@ class ConnectionEntityManagementService {
 
     manageConnectionResponse = async (sessionId, answer) => {
         const session = await this.dataLayer.get(sessionId);
-        session.connections[answer.offerIndex].answer = answer.offer;
+        session.connections[answer.offerIndex].answer = answer.answer;
         await this.dataLayer.set(sessionId, session);
     }
 }

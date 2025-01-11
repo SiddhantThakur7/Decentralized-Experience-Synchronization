@@ -25,6 +25,9 @@ class Server {
 
     answerConnectionRequest = async (sessionId, answer) => {
         const response = await fetch(`${this.apiEndpoint}/session/access/${sessionId}`, {
+            headers: {
+                "Content-Type": "application/json",
+            },
             method: "POST",
             body: JSON.stringify(answer),
         });

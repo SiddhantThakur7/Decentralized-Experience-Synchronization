@@ -20,6 +20,7 @@ const SignallingService = require("./Services/SignallingService");
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 app.use((req, res, next) => {

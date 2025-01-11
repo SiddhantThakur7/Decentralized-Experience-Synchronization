@@ -26,8 +26,8 @@ class SessionAccessController {
     }
 
     joinSession = (req, res, next) => {
-        const sessionId = req.param.sessionId;
-        const answer = req.body.answer;
+        const sessionId = req.params.sessionId;
+        const answer = req.body;
         const signallingService = req.app.get(Constants.SIGNALLING_SERVICE_INSTANCE);
         this.connectionEntityManagementService.manageConnectionResponse(sessionId, answer)
             .then((result) => {

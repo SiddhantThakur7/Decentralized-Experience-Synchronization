@@ -27,8 +27,8 @@ class Redisclient {
     }
 
     set = async (cacheKey, value) => {
-        const cacheValue = new CacheRecord(value);
-        await this.client.set(cacheKey, JSON.stringify(cacheValue));
+        const cacheValue = JSON.stringify(new CacheRecord(value));
+        await this.client.set(cacheKey, cacheValue);
     }
 }
 

@@ -31,13 +31,14 @@ class PeerConnectionEntity {
     Offer = async (id, suffix) => {
         this.channel.Create(id, suffix);
         const offerDescription = await this.peerConnection.createOffer();
-        this.offer = offerDescription;
         await this.SetLocalDescription(offerDescription);
+        this.offer = this.peerConnection.localDescription;
         this.peerConnection.onicecandidate = (candidate) => {
             if (candidate.candidate == null) {
-                console.log("Your offer is:", JSON.stringify(this.peerConnection.localDescription), `id=${id}, suffix=${suffix}`);
+                console.log("Your offer is:", this.offer, `id=${id}, suffix=${suffix}`);
             }
         }
+        return this.peerConnection.localDescription;
     }
 
     Answer = async (remoteSdp) => {
@@ -46,21 +47,22 @@ class PeerConnectionEntity {
         }
         const remoteDescription = new RTCSessionDescription(remoteSdp);
         this.channel.Discover();
-        await SetRemoteDescription(remoteDescription);
+        await this.SetRemoteDescription(remoteDescription);
         if (this.offer) {
-            this.answer = remoteDescription;
-            return
+            this.answer = this.peerConnection.remoteDescription;
+            return this.peerConnection.remoteDescription;
         } else {
-            this.offer = remoteDescription;
+            this.offer = this.peerConnection.remoteDescription;
         }
         const answerDescription = await this.peerConnection.createAnswer();
-        this.answer = answerDescription;
-        await SetLocalDescription(answerDescription);
-        pc.onicecandidate = function (candidate) {
+        await this.SetLocalDescription(answerDescription);
+        this.answer = this.peerConnection.localDescription;
+        this.peerConnection.onicecandidate = function (candidate) {
             if (candidate.candidate == null) {
-                console.log("answer: ", JSON.stringify(this.peerConnection.localDescription));
+                console.log("answer: ", this.answer);
             }
         }
+        return this.peerConnection.localDescription;
     }
 
     SetChannelOpeningAction = (action) => {
@@ -98,10 +100,10 @@ class PeerConnectionChannel {
     Discover = () => {
         this.pc.ondatachannel = (event) => {
             this.channel = event.channel;
+            this.channel.onopen = this.#openingAction;
+            this.channel.onmessage = this.#messageAction;
+            this.channel.onerror = this.#errorAction;
         }
-        this.channel.onopen = this.#openingAction;
-        this.channel.onmessage = this.#messageAction;
-        this.channel.onerror = this.#errorAction;
     }
 
     SetMessageAction = async (action) => {

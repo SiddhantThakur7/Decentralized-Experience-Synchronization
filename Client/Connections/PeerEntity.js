@@ -15,7 +15,7 @@ class PeerEntity {
     instantiate = async () => {
         this.peerId = Date.now();
         if (window.location.origin.includes('localhost:8080')) { //Todo: Change 'app' to domain name of the hosted app
-            await this.AnswerSessionRequest()
+            await this.AnswerSessionRequest();
         } else {
             await this.CreateSessionRequest();
         }
@@ -28,6 +28,10 @@ class PeerEntity {
         this.signallingServer = new SignallingServer(sessionId);
     }
 
+    answerHandler = (data) => {
+        console.log(data)
+    }
+
     CreateSessionRequest = async () => {
         await this.InstantiateSession();
         for (let i = 0; i < this.PEER_LIMIT; i++) {
@@ -38,11 +42,12 @@ class PeerEntity {
             url: this.session.url ?? window.location.href,
             connections: this.connections.map(connection => {
                 return {
-                    offer: connection.offer,
-                    answer: connection.answer,
+                    offer: connection.offer ? JSON.stringify(connection.offer) : null,
+                    answer: connection.answer ? JSON.stringify(connection.answer) : null,
                 }
             })
         })
+        this.signallingServer.registerAnswerHandler(this.answerHandler);
     }
 
     AnswerSessionRequest = async () => {
@@ -58,8 +63,8 @@ class PeerEntity {
         await this.server.answerConnectionRequest(
             sessionId,
             {
-                answer: this.answers[0],
-                offerIndex: offerIndex
+                answer: JSON.stringify(this.answers[0]),
+                offerIndex: Number(offerIndex)
             }
         );
     }
@@ -72,7 +77,7 @@ class PeerEntity {
 
     CreateConnectionResponse = async (remoteSdp, isPrimary = false) => {
         let connectionEntity = new PeerConnectionEntity(isPrimary);
-        this.answers.push(await connectionEntity.Answer(remoteSdp));
+        this.answers.push(await connectionEntity.Answer(JSON.parse(remoteSdp)));
         this.connections.push(connectionEntity);
         this.session.SetPrimaryPeerConnection(connectionEntity);
     }

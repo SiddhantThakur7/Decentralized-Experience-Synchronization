@@ -9,7 +9,7 @@ class ExperienceSession {
     this.primaryPeerConnection = primaryPeerConnection;
   }
 
-  setPrimaryPeerConnection = (peerConnection) => {
+  SetPrimaryPeerConnection = (peerConnection) => {
     this.primaryPeerConnection = peerConnection;
   };
 }
