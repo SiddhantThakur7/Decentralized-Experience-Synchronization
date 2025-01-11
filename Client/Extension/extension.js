@@ -45,11 +45,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   statusDisplay = document.getElementById("status");
   if (button) {
     button.addEventListener("click", () => {
+      statusDisplay.innerHTML = statusDisplay.innerHTML == "Status: Paused" ? "Status: Playing" : "Status: Paused";
       console.log("Button Clicked 1", contentScriptConnection, statusDisplay);
       contentScriptConnection.postMessage(
         JSON.stringify({
           event: Constants.REMOTE_STREAM_MANIPULATED_EVENT,
-          playState: false,
+          playState: statusDisplay.innerHTML == "Status: Playing",
           timestamp: 10000
         }));
     });

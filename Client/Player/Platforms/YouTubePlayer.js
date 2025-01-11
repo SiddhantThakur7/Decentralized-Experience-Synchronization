@@ -1,7 +1,9 @@
 // YouTubePlayer.js
 class YouTubePlayer {
-    #playingStateChangeAction = () => pass;
-    #seekAction = () => pass;
+    #actor = true;
+    #playingStateChangeAction = () => null;
+    #seekAction = () => null;
+    #postEventAction = () => null;
     #player;
 
     constructor() { }
@@ -26,19 +28,37 @@ class YouTubePlayer {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    // publicly accessible methods
+    #unsetActor = () => {
+        this.#actor = false;
+    }
 
+    // publicly accessible methods
     instantiate = async () => {
         this.#player = await this.#throttledRetry(this.#getPlayerReference);
-        console.log(this.#player);
     }
 
     setplayingStateChangeAction = (action) => {
-        this.#playingStateChangeAction = action;
+        this.#playingStateChangeAction = () => {
+            action();
+            if (this.#actor) {
+                this.#postEventAction();
+            }
+            this.#actor = true;
+        };
     }
 
-    setseekAction = (action) => {
-        this.#seekAction = action;
+    setSeekAction = (action) => {
+        this.#seekAction = () => {
+            action();
+            if (this.#actor) {
+                this.#postEventAction();
+            }
+            this.#actor = true;
+        };
+    }
+
+    setPostEventAction = (action) => {
+        this.#postEventAction = action;
     }
 
     setplayingStateChangeListener = () => {
@@ -51,14 +71,17 @@ class YouTubePlayer {
     }
 
     seekTo = (timestamp) => {
-        return this.#player.seek(timestamp);
+        this.#unsetActor();
+        return this.#player.currentTime = timestamp;
     }
 
     play = () => {
+        this.#unsetActor();
         return this.#player.play();
     }
 
     pause = () => {
+        this.#unsetActor();
         return this.#player.pause();
     }
 

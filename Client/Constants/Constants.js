@@ -1,5 +1,5 @@
 class Constants {
-    static EXTENSION_ID = "ckdoonppjpjjnanooamoefkkoknmclfm";
+    static EXTENSION_ID = "ncmkihhmjnhdkmfemcabkcepadafdehg";
     static CLIENT_EXTENSION_PORT = "webpage";
     static EXTENSION_BRIDGE_PORT = "content-script";
     static STUN_SERVERS = ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"];

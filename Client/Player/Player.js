@@ -12,6 +12,7 @@ class Player {
 
     instantiate = async () => {
         await this.#player.instantiate();
+        return this;
     }
 
     setplayingStateChangeListener = (action) => {

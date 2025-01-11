@@ -57,7 +57,7 @@ class NetflixPlayer {
         };
     }
 
-    setseekAction = (action) => {
+    setSeekAction = (action) => {
         this.#seekAction = () => {
             action();
             if (this.#actor) {
@@ -80,17 +80,17 @@ class NetflixPlayer {
     }
 
     seekTo = (timestamp) => {
-        this.#unsetActor()
+        this.#unsetActor();
         return this.#player.seek(timestamp);
     }
 
     play = () => {
-        this.#unsetActor()
+        this.#unsetActor();
         return this.#player.play();
     }
 
     pause = () => {
-        this.#unsetActor()
+        this.#unsetActor();
         return this.#player.pause();
     }
 
