@@ -1,10 +1,13 @@
 const Constants = require('../Constants');
 const ConnectionEntityManagementService = require('../Services/ConnectionEntiyManagementService');
 
-class SessionCreationController {
+class SessionAccessController {
     connectionEntityManagementService = null;
-    constructor() {
-        this.connectionEntityManagementService = new ConnectionEntityManagementService();
+    constructor() { }
+
+    instantiate = async () => {
+        this.connectionEntityManagementService = await (new ConnectionEntityManagementService()).instantiate();
+        return this;
     }
 
     getConnectionRequest = (req, res, next) => {
@@ -35,5 +38,5 @@ class SessionCreationController {
     }
 }
 
-module.exports = SessionCreationController;
+module.exports = SessionAccessController;
 

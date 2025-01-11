@@ -5,11 +5,15 @@ const ConnectionEntityManagementService = require('../Services/ConnectionEntiyMa
 class SessionCreationController {
     constructor() { }
 
+    instantiate = async () => {
+        this.connectionEntityManagementService = await (new ConnectionEntityManagementService()).instantiate();
+        return this;
+    }
+
     createSession = (req, res, next) => {
         var sessionId = uuidv4();
         const signallingService = req.app.get(Constants.SIGNALLING_SERVICE_INSTANCE);
-        var connectionEntityManagementService = new ConnectionEntityManagementService();
-        signallingService.createChannel(sessionId, connectionEntityManagementService.manageConnectionRequest);
+        signallingService.createChannel(sessionId, this.connectionEntityManagementService.manageConnectionRequest);
         res.status(200).json({
             sessionId: sessionId
         });

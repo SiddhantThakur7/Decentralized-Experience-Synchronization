@@ -1,4 +1,4 @@
-class SignallingService {
+class SignallingServer {
     apiEndpoint = null;
     sessionId = null;
     socket = null;

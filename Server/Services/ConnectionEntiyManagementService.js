@@ -6,12 +6,15 @@ const RedisClient = require('./RedisClient');
 
 class ConnectionEntityManagementService {
     dataLayer = null;
-    constructor() {
-        this.dataLayer = new RedisClient();
+    constructor() { }
+
+    instantiate = async () => {
+        this.dataLayer = await (new RedisClient()).instantiate();
+        return this;
     }
 
     manageConnectionRequest = async (session) => {
-        await this.dataLayer.set(sessionId, session);
+        await this.dataLayer.set(session.sessionId, session);
     }
 
     getUniqueOffer = async (sessionId) => {

@@ -1,12 +1,15 @@
 class ExperienceSession {
   sessionId = null;
-  primaryPeer = null;
+  url = null;
+  primaryPeerConnection = null;
 
-  constructor(sessionId = null) {
+  constructor(sessionId = null, url = '', primaryPeerConnection = null) {
     this.sessionId = sessionId;
+    this.url = url;
+    this.primaryPeerConnection = primaryPeerConnection;
   }
 
-  SetPrimaryPeer = peer => {
-    this.primaryPeer = peer;
+  setPrimaryPeerConnection = (peerConnection) => {
+    this.primaryPeerConnection = peerConnection;
   };
 }

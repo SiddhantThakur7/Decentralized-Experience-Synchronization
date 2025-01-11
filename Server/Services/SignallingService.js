@@ -11,7 +11,7 @@ class SignallingService {
         const channel = this.io.of(`/${sessionId}`);
         channel.on("connection", (socket) => {
             this.sessionChannelMap.set(sessionId, socket);
-            socket.on('offer', eventHandler);
+            socket.on('offer', (data) => eventHandler(JSON.parse(data)));
             socket.on("disconnect", () => {
                 console.log("user disconnected");
             });

@@ -31,6 +31,12 @@
         "Player/Platforms/NetflixPlayer.js",
         "Player/Platforms/YouTubePlayer.js",
         "Player/Player.js",
+        "Socket/Socket.js",
+        "Signalling/Server.js",
+        "Signalling/SignallingServer.js",
+        "Connections/PeerConnectionEntity.js",
+        "Connections/ExperienceSession.js",
+        "Connections/PeerEntity.js",
         "Client/client.js"
       ],
       "all_frames": true,

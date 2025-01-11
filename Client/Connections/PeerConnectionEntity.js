@@ -5,18 +5,18 @@ class PeerConnectionEntity {
     channel = null;
     isPrimary = false;
 
-    servers = {
+    SERVERS = {
         iceServers: [
             {
-                urls: Constants,
+                urls: Constants.STUN_SERVERS,
             },
         ],
         iceCandidatePoolSize: 10,
     };
 
     constructor(isPrimary = false) {
-        this.peerConnection = new RTCPeerConnection(servers);
-        this.channel = new PeerConnectionChannel();
+        this.peerConnection = new RTCPeerConnection(this.SERVERS);
+        this.channel = new PeerConnectionChannel(this.peerConnection);
         this.isPrimary = isPrimary;
     }
 
@@ -74,17 +74,17 @@ class PeerConnectionEntity {
 
 class PeerConnectionChannel {
     channel = null;
-    #pc = null;
-    #messageAction = () => { };
-    #openingAction = () => { };
+    pc = null;
+    #messageAction = () => null;
+    #openingAction = () => null;
     #errorAction = (error) => console.log(error);
 
     constructor(peerConnection) {
-        this.#pc = peerConnection;
+        this.pc = peerConnection;
     }
 
     Create = (id, suffix) => {
-        this.channel = this.#pc.createDataChannel(
+        this.channel = this.pc.createDataChannel(
             `${id}-${suffix}`,
             {
                 reliable: true
@@ -96,7 +96,7 @@ class PeerConnectionChannel {
     }
 
     Discover = () => {
-        this.#pc.ondatachannel = (event) => {
+        this.pc.ondatachannel = (event) => {
             this.channel = event.channel;
         }
         this.channel.onopen = this.#openingAction;

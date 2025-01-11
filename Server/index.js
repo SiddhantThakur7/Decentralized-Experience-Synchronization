@@ -6,7 +6,11 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server, {
     pingTimeout: 1000,
-    maxHttpBufferSize: 5e6
+    maxHttpBufferSize: 5e6,
+    cors: {
+        origin: "*", // Replace "*" with client URL for better security
+        methods: ["GET", "POST"]
+    }
 });
 
 const Constants = require("./Constants");

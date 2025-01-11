@@ -36,11 +36,18 @@ const setupPlayer = async (port) => {
     return videoPlayer;
 }
 
-var port = setupCommunication();
+const createSession = async () => {
+    return await (new PeerEntity()).instantiate();
+}
+
+// var port = setupCommunication();
 var player = null;
+var peer = null;
 
 window.addEventListener("load", async () => {
-    player = await setupPlayer(port);
+    // player = await setupPlayer(port);
     // console.log("player =", player);
+    peer = await createSession();
+    // console.log("peer =", peer);
 });
 
