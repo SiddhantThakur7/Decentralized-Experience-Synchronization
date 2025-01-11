@@ -11,7 +11,7 @@ class SessionAccessController {
     }
 
     getConnectionRequest = (req, res, next) => {
-        const sessionId = req.param.sessionId;
+        const sessionId = req.params.sessionId;
         this.connectionEntityManagementService.getUniqueOffer(sessionId)
             .then((result) => {
                 res.render(

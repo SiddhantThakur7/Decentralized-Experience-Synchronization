@@ -22,7 +22,7 @@ class Redisclient {
     }
 
     get = async (cacheKey) => {
-        const result = await this.client.get(cacheKey);
+        const result = await this.client.get(cacheKey.toString());
         return result ? JSON.parse(result).data : null;
     }
 

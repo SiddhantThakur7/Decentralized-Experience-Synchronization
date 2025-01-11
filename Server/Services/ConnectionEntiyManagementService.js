@@ -13,7 +13,12 @@ class ConnectionEntityManagementService {
         return this;
     }
 
-    manageConnectionRequest = async (session) => {
+    manageConnectionRequest = async (sessionData) => {
+        let session = new Session(
+            sessionData.sessionId,
+            sessionData.url,
+            sessionData.connections
+        );
         await this.dataLayer.set(session.sessionId, session);
     }
 
@@ -22,7 +27,7 @@ class ConnectionEntityManagementService {
         // await this.dataLayer.lock(sessionId);
         const session = await this.dataLayer.get(sessionId);
         const offerIndex = session.consumed;
-        offer = new Offer(session.connections[offerIndex].offer, offerIndex);
+        offer = new Offer(JSON.stringify(session.connections[offerIndex].offer), offerIndex);
         session.consumed += 1;
         await this.dataLayer.set(sessionId, session);
         return {

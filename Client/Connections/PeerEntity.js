@@ -15,7 +15,7 @@ class PeerEntity {
     instantiate = async () => {
         this.peerId = Date.now();
         if (window.location.origin.includes('localhost:8080')) { //Todo: Change 'app' to domain name of the hosted app
-            await this.AnswerSessionRequest(window.location.pathname.slice(1))
+            await this.AnswerSessionRequest()
         } else {
             await this.CreateSessionRequest();
         }
@@ -46,9 +46,22 @@ class PeerEntity {
     }
 
     AnswerSessionRequest = async () => {
-        // let connectionAssets = await SignallingServer.Get(sessionId);
-        this.session = new ExperienceSession(connectionAssets.SessionId);
-        await this.CreateConnectionResponse(connectionAssets.Offer, true);
+        const sessionId = window.location.pathname
+            .split('/')
+            .filter(item => item)
+            .slice(-1)[0];
+        const url = document.getElementById('session-url').value;
+        const offer = document.getElementById('offer-sdp').value;
+        const offerIndex = document.getElementById('offer-index').value;
+        this.session = new ExperienceSession(sessionId, url);
+        await this.CreateConnectionResponse(offer, true);
+        await this.server.answerConnectionRequest(
+            sessionId,
+            {
+                answer: this.answers[0],
+                offerIndex: offerIndex
+            }
+        );
     }
 
     CreateConnectionRequest = async (isPrimary = false, suffix) => {
@@ -61,6 +74,6 @@ class PeerEntity {
         let connectionEntity = new PeerConnectionEntity(isPrimary);
         this.answers.push(await connectionEntity.Answer(remoteSdp));
         this.connections.push(connectionEntity);
-        this.session.SetPrimaryPeer(connectionEntity);
+        this.session.SetPrimaryPeerConnection(connectionEntity);
     }
 }
