@@ -4,6 +4,7 @@ class PeerConnectionEntity {
     peerConnection = null;
     channel = null;
     isPrimary = false;
+    connected = false;
 
     SERVERS = {
         iceServers: [
@@ -18,6 +19,12 @@ class PeerConnectionEntity {
         this.peerConnection = new RTCPeerConnection(this.SERVERS);
         this.channel = new PeerConnectionChannel(this.peerConnection);
         this.isPrimary = isPrimary;
+        this.peerConnection.addEventListener('connectionstatechange', () => {
+            this.connected = this.peerConnection.connectionState == 'connected';
+            if (this.connected) {
+                console.log("Peer connection established!");
+            }
+        });
     }
 
     SetLocalDescription = async (sdp) => {
@@ -32,13 +39,16 @@ class PeerConnectionEntity {
         this.channel.Create(id, suffix);
         const offerDescription = await this.peerConnection.createOffer();
         await this.SetLocalDescription(offerDescription);
-        this.offer = this.peerConnection.localDescription;
-        this.peerConnection.onicecandidate = (candidate) => {
-            if (candidate.candidate == null) {
-                console.log("Your offer is:", this.offer, `id=${id}, suffix=${suffix}`);
-            }
-        }
-        return this.peerConnection.localDescription;
+
+        return new Promise((resolve) => {
+            this.peerConnection.onicecandidate = (candidate) => {
+                if (candidate.candidate == null) {
+                    this.offer = this.peerConnection.localDescription;
+                    console.log("Your offer is:", this.offer, `id=${id}, suffix=${suffix}`);
+                    resolve(this.offer); // Resolve when ICE gathering is complete
+                }
+            };
+        });
     }
 
     Answer = async (remoteSdp) => {
@@ -54,9 +64,18 @@ class PeerConnectionEntity {
         } else {
             this.offer = this.peerConnection.remoteDescription;
         }
+
         const answerDescription = await this.peerConnection.createAnswer();
         await this.SetLocalDescription(answerDescription);
-        this.answer = this.peerConnection.localDescription;
+        return new Promise((resolve) => {
+            this.peerConnection.onicecandidate = (candidate) => {
+                if (candidate.candidate == null) {
+                    this.answer = this.peerConnection.localDescription;
+                    console.log("Your answer is:", this.answer);
+                    resolve(this.peerConnection.localDescription); // Resolve when ICE gathering is complete
+                }
+            };
+        });
         this.peerConnection.onicecandidate = function (candidate) {
             if (candidate.candidate == null) {
                 console.log("answer: ", this.answer);
@@ -65,21 +84,25 @@ class PeerConnectionEntity {
         return this.peerConnection.localDescription;
     }
 
-    SetChannelOpeningAction = (action) => {
-        this.channel.SetOpeningAction(action);
+    // SetChannelOnOpenAction = (action) => {
+    //     this.channel.SetOnOpenAction(action);
+    // }
+
+    SetChannelOnMessageAction = (action) => {
+        this.channel.SetOnMessageAction(action);
     }
 
-    SetChannelMessageAction = (action) => {
-        this.channel.SetMessageAction(action);
+    Send = (message) => {
+        this.channel.Send(message);
     }
 }
 
 class PeerConnectionChannel {
     channel = null;
     pc = null;
-    #messageAction = () => null;
-    #openingAction = () => null;
-    #errorAction = (error) => console.log(error);
+    onOpenAction = () => console.log("Channel created!");
+    onMessageAction = () => null;
+    onErrorAction = (error) => console.log(error);
 
     constructor(peerConnection) {
         this.pc = peerConnection;
@@ -92,25 +115,31 @@ class PeerConnectionChannel {
                 reliable: true
             }
         );
-        this.channel.onopen = this.#openingAction;
-        this.channel.onmessage = this.#messageAction;
-        this.channel.onerror = this.#errorAction;
+        this.channel.onopen = this.onOpenAction;
+        this.channel.onmessage = this.onMessageAction;
+        this.channel.onerror = this.onErrorAction;
     }
 
     Discover = () => {
         this.pc.ondatachannel = (event) => {
             this.channel = event.channel;
-            this.channel.onopen = this.#openingAction;
-            this.channel.onmessage = this.#messageAction;
-            this.channel.onerror = this.#errorAction;
+            this.channel.onopen = this.onOpenAction;
+            this.channel.onmessage = this.onMessageAction;
+            this.channel.onerror = this.onErrorAction;
         }
     }
 
-    SetMessageAction = async (action) => {
-        this.#messageAction = action;
+    SetOnMessageAction = async (action) => {
+        this.onMessageAction = action;
     }
 
-    SetOpeningAction = async (action) => {
-        this.#openingAction = action;
+    // SetOnOpenAction = async (action) => {
+    //     this.onOpenAction = action;
+    // }
+
+    Send = (message) => {
+        if (!this.channel)
+            return null;
+        this.channel.send(JSON.stringify(message));
     }
 }

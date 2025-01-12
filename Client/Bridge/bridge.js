@@ -3,7 +3,7 @@ port.postMessage({ message: "Connection Established!" });
 port.onMessage.addListener(function (evt) {
     let eventData = JSON.parse(evt);
     if (eventData.event == Constants.REMOTE_STREAM_MANIPULATED_EVENT) {
-        window.postMessage(evt);
+        // window.postMessage(evt);
     }
 });
 console.log("extensionId = ", chrome.runtime.id);

@@ -84,4 +84,27 @@ class PeerEntity {
         this.connections.push(connectionEntity);
         this.session.SetPrimaryPeerConnection(connectionEntity);
     }
+
+    //Event Handles
+
+    //Transmission Methods
+
+    SendToPrimary = (message) => {
+        if (!this.session || !this.session.primaryPeerConnection) {
+            return null;
+        }
+        this.session.primaryPeerConnection.Send(message);
+    }
+
+    Broadcast = (message) => {
+        if (!this.connections) {
+            return null;
+        }
+        this.connections.forEach(
+            connection =>
+                connection.connected
+                    ? connection.Send(message) :
+                    null
+        );
+    }
 }

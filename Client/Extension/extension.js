@@ -14,7 +14,7 @@ const servers = {
   ],
   iceCandidatePoolSize: Constants.ICE_CANDIDATE_POOL_SIZE
 };
-var pc = null;
+var pc = new RTCPeerConnection(servers);
 
 chrome.runtime.onConnect.addListener(function (port) {
   contentScriptConnection = port;
@@ -74,9 +74,9 @@ async function createOffer() {
   const offerDescription = await pc.createOffer();
   await pc.setLocalDescription(offerDescription);
   console.log(pc);
+  console.log("Your offer is:", JSON.stringify(pc.localDescription));
   pc.onicecandidate = function (candidate) {
     if (candidate.candidate == null) {
-      console.log("Your offer is:", JSON.stringify(pc.localDescription));
       document.getElementById("local-description").value = JSON.stringify(
         pc.localDescription
       );
@@ -88,7 +88,7 @@ async function respondToOffer() {
   if (!pc) {
     pc = new RTCPeerConnection(servers);
   }
-  data = JSON.parse(document.getElementById("remote-description-1").value);
+  data = JSON.parse(document.getElementById("remote-description").value);
   sessionDescription = new RTCSessionDescription(data);
   handleDataChannel();
   pc.setRemoteDescription(sessionDescription);
