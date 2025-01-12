@@ -11,14 +11,10 @@ class SignallingServer {
 
     establishConnection = () => {
         this.socket = io(`${this.apiEndpoint}/${this.sessionId}`);
-
-        this.socket.on("connect", () => {
-            console.log(`Connected to session ${this.sessionId} with ID: ${this.socket.id}`);
-        });
     }
 
     registerAnswerHandler(eventHandler) {
-        this.socket.on('answer', (data) => eventHandler(JSON.parse(data)));
+        this.socket.on('answer', async (data) => eventHandler(JSON.parse(data)));
     }
 
     push = (data) => {

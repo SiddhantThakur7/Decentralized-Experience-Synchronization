@@ -12,10 +12,20 @@
     {
       "matches": [
         "https://www.netflix.com/*",
-        "https://www.youtube.com/*"
+        "https://www.youtube.com/*",
+        "http://localhost:8080/*"
       ],
       "js": [
         "Constants/Constants.js",
+        "Player/Platforms/NetflixPlayer.js",
+        "Player/Platforms/YouTubePlayer.js",
+        "Player/Player.js",
+        "Socket/Socket.js",
+        "Signalling/Server.js",
+        "Signalling/SignallingServer.js",
+        "Connections/PeerConnectionEntity.js",
+        "Connections/ExperienceSession.js",
+        "Connections/PeerEntity.js",
         "Bridge/bridge.js"
       ],
       "run_at": "document_end",

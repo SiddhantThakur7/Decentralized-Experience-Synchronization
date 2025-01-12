@@ -1,22 +1,28 @@
+var extensionId = null;
 const setupCommunication = () => {
     window.addEventListener(
         "message",
         (event) => {
             console.log(event);
             let eventData = JSON.parse(event.data);
-            console.log("injected", event, eventData, player, !player.currentPlayState());
-            if (eventData.playState != player.currentPlayState()) {
-                if (player.currentPlayState()) {
-                    player.pauseAt(eventData.timestamp);
-                } else {
-                    player.playFrom(eventData.timestamp);
+            if (eventData.event == Constants.REMOTE_STREAM_MANIPULATED_EVENT) {
+                console.log("injected", event, eventData, player, !player.currentPlayState());
+                if (eventData.playState != player.currentPlayState()) {
+                    if (player.currentPlayState()) {
+                        player.pauseAt(eventData.timestamp);
+                    } else {
+                        player.playFrom(eventData.timestamp);
+                    }
                 }
+            } else if (eventData.event == Constants.REMOTE_STREAM_MANIPULATED_EVENT) {
+                extensionId = eventData.extensionId;
             }
+
         },
         false
     );
 
-    return chrome.runtime.connect(Constants.EXTENSION_ID, { name: Constants.EXTENSION_ID });
+    return chrome.runtime.connect(extensionId, { name: Constants.EXTENSION_ID });
 }
 
 const setupPlayer = async (port) => {
@@ -45,9 +51,11 @@ var player = null;
 var peer = null;
 
 window.addEventListener("load", async () => {
+    // console.log("extensionId = ", chrome.runtime.id);
+
     // player = await setupPlayer(port);
     // console.log("player =", player);
-    peer = await createSession();
+    // peer = await createSession();
     // console.log("peer =", peer);
 });
 

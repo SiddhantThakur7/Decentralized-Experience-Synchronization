@@ -28,10 +28,6 @@ class PeerEntity {
         this.signallingServer = new SignallingServer(sessionId);
     }
 
-    answerHandler = (data) => {
-        console.log(data)
-    }
-
     CreateSessionRequest = async () => {
         await this.InstantiateSession();
         for (let i = 0; i < this.PEER_LIMIT; i++) {
@@ -47,7 +43,7 @@ class PeerEntity {
                 }
             })
         })
-        this.signallingServer.registerAnswerHandler(this.answerHandler);
+        this.signallingServer.registerAnswerHandler(this.CompleteHandshake);
     }
 
     AnswerSessionRequest = async () => {
@@ -69,9 +65,16 @@ class PeerEntity {
         );
     }
 
+    CompleteHandshake = async (response) => {
+        const { answer, offerIndex } = response;
+        const connectionEntity = this.connections[offerIndex];
+        this.answers[offerIndex] = await connectionEntity.Answer(JSON.parse(answer));
+    }
+
     CreateConnectionRequest = async (isPrimary = false, suffix) => {
         let connectionEntity = new PeerConnectionEntity(isPrimary);
         this.offers.push(await connectionEntity.Offer(this.peerId, suffix));
+        this.answers.push(null);
         this.connections.push(connectionEntity)
     }
 

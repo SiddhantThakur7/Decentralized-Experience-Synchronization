@@ -6,4 +6,18 @@ port.onMessage.addListener(function (evt) {
         window.postMessage(evt);
     }
 });
+console.log("extensionId = ", chrome.runtime.id);
 
+window.extensionId = chrome.runtime.id;
+
+const createSession = async () => {
+    return await (new PeerEntity()).instantiate();
+}
+window.addEventListener("load", async () => {
+    console.log("extensionId = ", chrome.runtime.id);
+
+    // player = await setupPlayer(port);
+    // console.log("player =", player);
+    peer = await createSession();
+    console.log("peer =", peer);
+});
