@@ -16,13 +16,6 @@ const servers = {
 };
 var pc = new RTCPeerConnection(servers);
 
-chrome.runtime.onConnect.addListener(function (port) {
-  contentScriptConnection = port;
-  port.onMessage.addListener(function (msg) {
-    console.log("Content-Script: ", msg);
-  });
-});
-
 chrome.runtime.onConnectExternal.addListener(function (port) {
   webpageConnection = port;
   port.onMessage.addListener(function (evt) {
@@ -40,6 +33,12 @@ chrome.runtime.onConnectExternal.addListener(function (port) {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  contentScriptConnection = chrome.tabs.connect(tab.id, { name: Constants.EXTENSION_MAIN_PORT });
+  contentScriptConnection.postMessage({ event: Constants.EXTENSION_MAIN_CONNECTION_ESTABLISHED });
+  contentScriptConnection.onMessage.addListener((msg) => {
+    console.log("Received from content script:", msg);
+  });
   connectionForm = document.getElementById("connection-form");
   const button = document.getElementById("testButton");
   statusDisplay = document.getElementById("status");
@@ -64,6 +63,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   document
     .getElementById("respond-offer-button")
     .addEventListener("click", respondToOffer);
+
+  document
+    .getElementById("create-session-button")
+    .addEventListener("click", () => {
+      contentScriptConnection.postMessage(
+        {
+          event: Constants.CREATE_SESSION,
+        }
+      );
+    });
 });
 
 async function createOffer() {

@@ -1,4 +1,4 @@
-class Constants {
+export default class Constants2 {
     static EXTENSION_ID = "ncmkihhmjnhdkmfemcabkcepadafdehg";
     static MAIN_STORAGE_PORT = "MAIN:STORAGE";
     static EXTENSION_MAIN_PORT = "EXTENSION-MAIN";

@@ -76,20 +76,14 @@ class PeerConnectionEntity {
                 }
             };
         });
-        this.peerConnection.onicecandidate = function (candidate) {
-            if (candidate.candidate == null) {
-                console.log("answer: ", this.answer);
-            }
-        }
-        return this.peerConnection.localDescription;
     }
 
-    // SetChannelOnOpenAction = (action) => {
-    //     this.channel.SetOnOpenAction(action);
-    // }
+    SetChannelOnOpenAction = (action) => {
+        this.channel.SetOnOpenAction(action);
+    }
 
     SetChannelOnMessageAction = (action) => {
-        this.channel.SetOnMessageAction(action);
+        this.channel.SetRemoteStreamEventAction(action);
     }
 
     Send = (message) => {
@@ -101,7 +95,7 @@ class PeerConnectionChannel {
     channel = null;
     pc = null;
     onOpenAction = () => console.log("Channel created!");
-    onMessageAction = () => null;
+    remoteStreamEventAction = () => null;
     onErrorAction = (error) => console.log(error);
 
     constructor(peerConnection) {
@@ -116,7 +110,7 @@ class PeerConnectionChannel {
             }
         );
         this.channel.onopen = this.onOpenAction;
-        this.channel.onmessage = this.onMessageAction;
+        this.channel.onmessage = this.MessageHandler;
         this.channel.onerror = this.onErrorAction;
     }
 
@@ -124,18 +118,28 @@ class PeerConnectionChannel {
         this.pc.ondatachannel = (event) => {
             this.channel = event.channel;
             this.channel.onopen = this.onOpenAction;
-            this.channel.onmessage = this.onMessageAction;
+            this.channel.onmessage = this.MessageHandler;
             this.channel.onerror = this.onErrorAction;
         }
     }
 
-    SetOnMessageAction = async (action) => {
-        this.onMessageAction = action;
+    SetRemoteStreamEventAction = (action) => {
+        this.remoteStreamEventAction = action;
     }
 
-    // SetOnOpenAction = async (action) => {
-    //     this.onOpenAction = action;
-    // }
+    MessageHandler = async (event) => {
+        switch (event.event) {
+            case Constants.REMOTE_STREAM_MANIPULATED_EVENT:
+                await this.remoteStreamEventAction();
+                break;
+            default:
+                break;
+        }
+    }
+
+    SetOnOpenAction = async (action) => {
+        this.onOpenAction = action;
+    }
 
     Send = (message) => {
         if (!this.channel)
