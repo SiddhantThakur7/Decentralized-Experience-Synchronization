@@ -32,7 +32,7 @@ class SessionAccessController {
         this.connectionEntityManagementService.manageConnectionResponse(sessionId, answer)
             .then((result) => {
                 signallingService.pushToClient(sessionId, answer);
-                res.status(200);
+                res.status(200).send('success');
             })
             .catch(error => res.status(500).send(error));
     }

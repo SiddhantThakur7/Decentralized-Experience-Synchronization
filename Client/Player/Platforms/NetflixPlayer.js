@@ -3,7 +3,6 @@ class NetflixPlayer {
     #actor = true;
     #playingStateChangeAction = () => null;
     #seekAction = () => null;
-    #postEventAction = () => null;
     #player;
     #playerWrapper;
 
@@ -36,10 +35,6 @@ class NetflixPlayer {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    #unsetActor = () => {
-        this.#actor = false;
-    }
-
     // publicly accessible methods
 
     instantiate = async () => {
@@ -48,31 +43,15 @@ class NetflixPlayer {
     }
 
     setplayingStateChangeAction = (action) => {
-        this.#playingStateChangeAction = () => {
-            action();
-            if (this.#actor) {
-                this.#postEventAction();
-            }
-            this.#actor = true;
-        };
+        this.#playingStateChangeAction = action;
     }
 
     setSeekAction = (action) => {
-        this.#seekAction = () => {
-            action();
-            if (this.#actor) {
-                this.#postEventAction();
-            }
-            this.#actor = true;
-        };
+        this.#seekAction = action;
     }
 
     setplayingStateChangeListener = () => {
         this.#player.addEventListener('playingchanged', this.#playingStateChangeAction);
-    }
-
-    setPostEventAction = (action) => {
-        this.#postEventAction = action;
     }
 
     setSeekListener = () => {
@@ -80,17 +59,14 @@ class NetflixPlayer {
     }
 
     seekTo = (timestamp) => {
-        this.#unsetActor();
         return this.#player.seek(timestamp);
     }
 
     play = () => {
-        this.#unsetActor();
         return this.#player.play();
     }
 
     pause = () => {
-        this.#unsetActor();
         return this.#player.pause();
     }
 

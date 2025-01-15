@@ -20,10 +20,11 @@ class PeerConnectionEntity {
         this.channel = new PeerConnectionChannel(this.peerConnection);
         this.isPrimary = isPrimary;
         this.peerConnection.addEventListener('connectionstatechange', () => {
+            console.log("Connection state changed to:", this.peerConnection.connectionState);
             this.connected = this.peerConnection.connectionState == 'connected';
             if (this.connected) {
                 console.log("Peer connection established!");
-                window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.SESSION_CREATED } }));
+                // window.dispatchEvent(new CustomEvent("MESSAGE:MAIN", { detail: { event: Constants.PEER_CONNECTED } }));
             }
         });
     }
@@ -83,8 +84,8 @@ class PeerConnectionEntity {
         this.channel.SetOnOpenAction(action);
     }
 
-    SetChannelOnMessageAction = (action) => {
-        this.channel.SetRemoteStreamEventAction(action);
+    registerChannelOnMessageEventHandler = (action) => {
+        this.channel.registerOnMessageEventHandler(action);
     }
 
     Send = (message) => {
@@ -96,7 +97,7 @@ class PeerConnectionChannel {
     channel = null;
     pc = null;
     onOpenAction = () => console.log("Channel created!");
-    remoteStreamEventAction = () => null;
+    onMessageAction = () => null;
     onErrorAction = (error) => console.log(error);
 
     constructor(peerConnection) {
@@ -111,7 +112,7 @@ class PeerConnectionChannel {
             }
         );
         this.channel.onopen = this.onOpenAction;
-        this.channel.onmessage = this.MessageHandler;
+        this.channel.onmessage = this.onMessageAction;
         this.channel.onerror = this.onErrorAction;
     }
 
@@ -119,7 +120,7 @@ class PeerConnectionChannel {
         this.pc.ondatachannel = (event) => {
             this.channel = event.channel;
             this.channel.onopen = this.onOpenAction;
-            this.channel.onmessage = this.MessageHandler;
+            this.channel.onmessage = this.onMessageAction;
             this.channel.onerror = this.onErrorAction;
         }
     }
@@ -140,6 +141,10 @@ class PeerConnectionChannel {
 
     SetOnOpenAction = async (action) => {
         this.onOpenAction = action;
+    }
+
+    registerOnMessageEventHandler = async (action) => {
+        this.channel.onmessage = (event) => action(JSON.parse(event.data));
     }
 
     Send = (message) => {

@@ -56,10 +56,10 @@ class PeerEntity {
 
     CreateConnectionRequest = async (isPrimary = false, suffix) => {
         let connectionEntity = new PeerConnectionEntity(isPrimary);
+        connectionEntity.SetChannelOnOpenAction(this.dispatchChannelOnConnect);
         this.offers.push(await connectionEntity.Offer(this.peerId, suffix));
         this.answers.push(null);
-        connectionEntity.SetChannelOnOpenAction(() => console.log("Channel Opened!"));
-        this.connections.push(connectionEntity)
+        this.connections.push(connectionEntity);
     }
 
     SaveConnectionAssetsAndProceed = () => {
@@ -86,27 +86,20 @@ class PeerEntity {
     }
 
     AnswerSessionRequest = async (connectionAssets) => {
-        const { sessionId, url, offer, offerIndex } = connectionAssets;
-        this.session = new ExperienceSession(sessionId, url);
-        await this.CreateConnectionResponse(offer, true);
-        await this.server.answerConnectionRequest(
-            sessionId,
-            {
-                answer: JSON.stringify(this.answers[0]),
-                offerIndex: Number(offerIndex)
-            }
-        );
-        this.dispatchSessionCreationEvent();
-    }
-
-    dispatchSessionCreationEvent = () => {
-        window.dispatchEvent(new CustomEvent(
-            "MESSAGE:MAIN",
-            {
-                detail: {
-                    event: Constants.SESSION_CREATED
+        try {
+            const { sessionId, url, offer, offerIndex } = connectionAssets;
+            this.session = new ExperienceSession(sessionId, url);
+            await this.CreateConnectionResponse(offer, true);
+            await this.server.answerConnectionRequest(
+                sessionId,
+                {
+                    answer: JSON.stringify(this.answers[0]),
+                    offerIndex: Number(offerIndex)
                 }
-            }));
+            );
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     CompleteHandshake = async (response) => {
@@ -117,8 +110,8 @@ class PeerEntity {
 
     CreateConnectionResponse = async (remoteSdp, isPrimary = false) => {
         let connectionEntity = new PeerConnectionEntity(isPrimary);
+        connectionEntity.SetChannelOnOpenAction(this.dispatchChannelOnConnect);
         this.answers.push(await connectionEntity.Answer(JSON.parse(remoteSdp)));
-        connectionEntity.SetChannelOnOpenAction(() => console.log("Channel Opened!"));
         this.connections.push(connectionEntity);
         this.session.SetPrimaryPeerConnection(connectionEntity);
     }
@@ -128,9 +121,14 @@ class PeerEntity {
         this.connections.forEach(
             connection =>
                 connection
-                    ? connection.SetChannelOnMessageAction(action) :
+                    ? connection.registerChannelOnMessageEventHandler(action) :
                     null
         );
+    }
+
+    dispatchChannelOnConnect = () => {
+        console.log("Channel Opened!");
+        window.dispatchEvent(new CustomEvent("MESSAGE:MAIN", { detail: { event: Constants.PEER_CONNECTED } }));
     }
 
     //Transmission Methods

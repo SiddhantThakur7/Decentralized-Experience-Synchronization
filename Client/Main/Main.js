@@ -8,6 +8,7 @@ class Main {
 
     instantiate = async () => {
         this.peer = await (new PeerEntity()).instantiate();
+        console.log(this.peer);
     }
 
     setupCommunicationChannels = () => {
@@ -17,7 +18,6 @@ class Main {
 
     setupExtensionCommunicationChannel = () => {
         chrome.runtime.onConnect.addListener((port) => {
-            console.log(port.name);
             this.extensionPort = port;
             this.extensionPort.onMessage.addListener(this.extensionEventHandler);
         });
@@ -36,6 +36,7 @@ class Main {
                 console.log(event);
                 break;
             default:
+                console.log("No listener found:", event);
                 break;
         }
     }
@@ -44,24 +45,36 @@ class Main {
         // console.log(event.detail);
         switch (event.detail.event) {
             case Constants.REMOTE_STREAM_MANIPULATED_EVENT:
-                await this.peer.BroadCast(event);
+                await this.peer.Broadcast(event.detail);
                 break;
             case Constants.SESSION_CREATED:
                 this.extensionPort.postMessage(event.detail);
                 window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: event.detail }));
+                break;
+            case Constants.PEER_CONNECTED:
+                this.peer.registerChannelOnMessageEventHandler(this.peerEventHandler);
+                event.detail.getStatus = this.peer?.isPrimary ?? false;
+                window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: event.detail, }));
+                break;
             default:
+                console.log("No listener found:", event);
                 break;
         }
     }
 
     createSession = async () => {
         await this.peer.CreateSessionRequest();
-        this.peer.registerChannelOnMessageEventHandler(this.peerEventHandler);
-        console.log(this.extensionPort);
         this.extensionPort.postMessage({
             event: Constants.CREATE_SESSION,
             sessionId: this.peer.session.sessionId
         });
+        window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT",
+            {
+                detail: {
+                    event: Constants.CREATE_SESSION,
+                }
+            })
+        );
     }
 
     peerEventHandler = (event) => {
@@ -76,6 +89,7 @@ class Main {
                     ));
                 break;
             default:
+                console.log("No listener found:", event);
                 break;
         }
     }
