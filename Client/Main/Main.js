@@ -51,11 +51,6 @@ class Main {
                 this.extensionPort.postMessage(event.detail);
                 window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: event.detail }));
                 break;
-            case Constants.PEER_CONNECTED:
-                this.peer.registerChannelOnMessageEventHandler(this.peerEventHandler);
-                event.detail.getStatus = this.peer?.isPrimary ?? false;
-                window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: event.detail, }));
-                break;
             default:
                 console.log("No listener found:", event);
                 break;
@@ -75,23 +70,6 @@ class Main {
                 }
             })
         );
-    }
-
-    peerEventHandler = (event) => {
-        switch (event.event) {
-            case Constants.REMOTE_STREAM_MANIPULATED_EVENT:
-                window.dispatchEvent(
-                    new CustomEvent(
-                        "MESSAGE:CLIENT",
-                        {
-                            detail: event,
-                        }
-                    ));
-                break;
-            default:
-                console.log("No listener found:", event);
-                break;
-        }
     }
 }
 

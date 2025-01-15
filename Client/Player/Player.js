@@ -1,7 +1,7 @@
 class Player {
     #player;
     #postEventAction;
-    actor = false;
+    actor = true;
 
     constructor() {
         if (window.location.origin.includes('youtube')) {
@@ -17,16 +17,18 @@ class Player {
         return this;
     }
 
-    toggledActorAction = (action) => {
+    disabledActorAction = (action) => {
         this.actor = false;
         action();
-        this.actor = true;
     }
 
     setplayingStateChangeListener = (action) => {
         this.#player.setplayingStateChangeAction(() => {
             if (action) action();
-            if (this.actor) this.#postEventAction();
+            if (this.actor) {
+                this.#postEventAction()
+            };
+            this.actor = true;
         });
         this.#player.setplayingStateChangeListener();
     }
@@ -44,15 +46,15 @@ class Player {
     }
 
     seekTo = (timestamp) => {
-        this.toggledActorAction(() => this.#player.seekTo(timestamp));
+        this.disabledActorAction(() => this.#player.seekTo(timestamp));
     }
 
     play = () => {
-        this.toggledActorAction(this.#player.play);
+        this.disabledActorAction(this.#player.play);
     }
 
     pause = () => {
-        this.toggledActorAction(this.#player.pause);
+        this.disabledActorAction(this.#player.pause);
     }
 
     currentTimestamp = () => {

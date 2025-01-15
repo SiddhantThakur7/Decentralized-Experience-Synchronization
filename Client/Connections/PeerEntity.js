@@ -56,7 +56,9 @@ class PeerEntity {
 
     CreateConnectionRequest = async (isPrimary = false, suffix) => {
         let connectionEntity = new PeerConnectionEntity(isPrimary);
-        connectionEntity.SetChannelOnOpenAction(this.dispatchChannelOnConnect);
+        connectionEntity
+            .SetChannelOnOpenAction(this.channelOnOpenHandler)
+            .SetChannelOnMessageAction(this.channelOnMessageHandler);
         this.offers.push(await connectionEntity.Offer(this.peerId, suffix));
         this.answers.push(null);
         this.connections.push(connectionEntity);
@@ -88,15 +90,14 @@ class PeerEntity {
     AnswerSessionRequest = async (connectionAssets) => {
         const { sessionId, url, offer, offerIndex } = connectionAssets;
         this.session = new ExperienceSession(sessionId, url);
-        await this.CreateConnectionResponse(offer, true);
+        const answer = await this.CreateConnectionResponse(offer, true);
         await this.server.answerConnectionRequest(
             sessionId,
             {
-                answer: JSON.stringify(this.answers[0]),
+                answer: JSON.stringify(answer),
                 offerIndex: Number(offerIndex)
             }
         );
-        console.error(error);
     }
 
     CompleteHandshake = async (response) => {
@@ -106,26 +107,49 @@ class PeerEntity {
     }
 
     CreateConnectionResponse = async (remoteSdp, isPrimary = false) => {
-        let connectionEntity = new PeerConnectionEntity(isPrimary);
-        connectionEntity.SetChannelOnOpenAction(this.dispatchChannelOnConnect);
-        this.answers.push(await connectionEntity.Answer(JSON.parse(remoteSdp)));
+        const connectionEntity = new PeerConnectionEntity(isPrimary);
+        connectionEntity
+            .SetChannelOnOpenAction(this.channelOnOpenHandler)
+            .SetChannelOnMessageAction(this.channelOnMessageHandler);
+        const answer = await connectionEntity.Answer(JSON.parse(remoteSdp));
+        this.answers.push(answer);
         this.connections.push(connectionEntity);
-        this.session.SetPrimaryPeerConnection(connectionEntity);
+        if (isPrimary) {
+            this.session.SetPrimaryPeerConnection(connectionEntity);
+        }
+        return answer;
     }
 
-    //Event Handler Registration
-    registerChannelOnMessageEventHandler = async (action) => {
-        this.connections.forEach(
-            connection =>
-                connection
-                    ? connection.registerChannelOnMessageEventHandler(action) :
-                    null
-        );
-    }
-
-    dispatchChannelOnConnect = () => {
+    //Event Handlers
+    channelOnOpenHandler = () => {
         console.log("Channel Opened!");
-        window.dispatchEvent(new CustomEvent("MESSAGE:MAIN", { detail: { event: Constants.PEER_CONNECTED } }));
+        window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
+    }
+
+    channelOnMessageHandler = async (event) => {
+        switch (event.event) {
+            case Constants.REMOTE_STREAM_MANIPULATED_EVENT:
+                window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: event }));
+                break;
+            case Constants.SELF_ORGANIZING_OFFER_REQUEST:
+                await this.answerSelfOrganizingOfferRequest(event.connectionIndex);
+                break;
+            case Constants.SELF_ORGANIZING_ANSWER_REQUEST:
+                await this.answerSelfOrganizingAnswerRequest(event.offer, event.connectionIndex, event.offerIndex);
+                break;
+            case Constants.SELF_ORGANIZING_OFFER_RESPONSE:
+                this.sendSelfOrganizingAnswerRequests(event.offers, event.connectionIndex);
+                break;
+            case Constants.SELF_ORGANIZING_ANSWER_RESPONSE:
+                this.sendSelfOrganizingHandshakeCompletionRequest(event.answer, event.connectionIndex, event.offerIndex);
+                break;
+            case Constants.SELF_ORGANIZING_CONNECTION_REQUEST:
+                await this.CompleteHandshake(event);
+                break;
+            default:
+                console.log("No listener found:", event);
+                break;
+        }
     }
 
     //Transmission Methods
@@ -143,5 +167,61 @@ class PeerEntity {
                     ? connection.Send(message) :
                     null
         );
+    }
+
+    //Self-Organization Methods
+    sendSelfOrganizingOfferRequests = () => {
+        for (let i = 1; i < this.connections.length; i++) {
+            this.connections[i].Send({
+                event: Constants.SELF_ORGANIZING_OFFER_REQUEST,
+                connectionIndex: i
+            });
+        }
+    }
+
+    sendSelfOrganizingAnswerRequests = (offers, connectionIndex) => {
+        for (let i = 0; i < connectionIndex; i++) {
+            this.connections[i].Send({
+                event: Constants.SELF_ORGANIZING_ANSWER_REQUEST,
+                offer: offers[i],
+                offerIndex: i + 1,
+                connectionIndex: connectionIndex
+            });
+        }
+    }
+
+    sendSelfOrganizingHandshakeCompletionRequest = (answer, connectionIndex, offerIndex) => {
+        this.connections[connectionIndex].Send({
+            event: Constants.SELF_ORGANIZING_CONNECTION_REQUEST,
+            answer: answer,
+            offerIndex: offerIndex,
+        });
+    }
+
+    answerSelfOrganizingOfferRequest = async (connectionIndex) => {
+        for (let i = 0; i < connectionIndex; i++) {
+            await this.CreateConnectionRequest(false, i);
+        }
+        await this.SendToPrimary({
+            event: Constants.SELF_ORGANIZING_OFFER_RESPONSE,
+            offers: this.offers.slice(1),
+            connectionIndex: connectionIndex
+        })
+    }
+
+    answerSelfOrganizingAnswerRequest = async (offer, connectionIndex, offerIndex) => {
+        const answer = await this.CreateConnectionResponse(offer, false);
+        await this.server.answerConnectionRequest(
+            sessionId,
+            {
+                answer: JSON.stringify(this.answers[0]),
+                offerIndex: Number(offerIndex)
+            });
+        await this.SendToPrimary({
+            event: Constants.SELF_ORGANIZING_ANSWER_RESPONSE,
+            answer: JSON.stringify(answer),
+            offerIndex: offerIndex,
+            connectionIndex: connectionIndex
+        })
     }
 }

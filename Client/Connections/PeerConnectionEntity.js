@@ -24,7 +24,6 @@ class PeerConnectionEntity {
             this.connected = this.peerConnection.connectionState == 'connected';
             if (this.connected) {
                 console.log("Peer connection established!");
-                // window.dispatchEvent(new CustomEvent("MESSAGE:MAIN", { detail: { event: Constants.PEER_CONNECTED } }));
             }
         });
     }
@@ -82,10 +81,12 @@ class PeerConnectionEntity {
 
     SetChannelOnOpenAction = (action) => {
         this.channel.SetOnOpenAction(action);
+        return this;
     }
 
-    registerChannelOnMessageEventHandler = (action) => {
-        this.channel.registerOnMessageEventHandler(action);
+    SetChannelOnMessageAction = (action) => {
+        this.channel.SetOnMessageAction(action);
+        return this;
     }
 
     Send = (message) => {
@@ -129,22 +130,12 @@ class PeerConnectionChannel {
         this.remoteStreamEventAction = action;
     }
 
-    MessageHandler = async (event) => {
-        switch (event.event) {
-            case Constants.REMOTE_STREAM_MANIPULATED_EVENT:
-                await this.remoteStreamEventAction();
-                break;
-            default:
-                break;
-        }
-    }
-
     SetOnOpenAction = async (action) => {
         this.onOpenAction = action;
     }
 
-    registerOnMessageEventHandler = async (action) => {
-        this.channel.onmessage = (event) => action(JSON.parse(event.data));
+    SetOnMessageAction = async (action) => {
+        this.onMessageAction = (event) => action(JSON.parse(event.data));
     }
 
     Send = (message) => {
