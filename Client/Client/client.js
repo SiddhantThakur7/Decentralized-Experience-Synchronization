@@ -10,21 +10,23 @@ class Client {
         window.addEventListener("MESSAGE:CLIENT", this.eventHandler);
     }
 
-    setupPlayer = async (port) => {
+    setupPlayer = async () => {
         const videoPlayer = await (new Player()).instantiate();
-        port.postMessage({ message: "Connection Established!", status: !videoPlayer.currentPlayState() });
         videoPlayer.setPostEventAction(() =>
-            port.dispatchEvent(new CustomEvent(
+            window.dispatchEvent(new CustomEvent(
                 "MESSAGE:MAIN",
                 {
-                    event: Constants.REMOTE_STREAM_MANIPULATED_EVENT,
-                    playState: videoPlayer.currentPlayState(),
-                    timestamp: videoPlayer.currentTimestamp()
+                    detail: {
+                        event: Constants.REMOTE_STREAM_MANIPULATED_EVENT,
+                        playState: videoPlayer.currentPlayState(),
+                        timestamp: videoPlayer.currentTimestamp()
+                    }
                 }
             ))
         );
         videoPlayer.setplayingStateChangeListener(() => console.log(videoPlayer.currentPlayState() ? "Played" : "Paused"));
         videoPlayer.setSeekListener(() => console.log("Seeked"));
+        videoPlayer.pauseAt(0);
         return videoPlayer;
     }
 
@@ -40,11 +42,16 @@ class Client {
                         this.player.pauseAt(evt.timestamp);
                     }
                 break;
+            case Constants.SESSION_CREATED:
+                if (!this.player) {
+                    this.player = this.setupPlayer();
+                }
             default:
                 break;
         }
     }
 }
+
 var client = null;
 window.addEventListener("load", async () => {
     client = new Client();

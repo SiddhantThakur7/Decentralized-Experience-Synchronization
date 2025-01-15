@@ -23,6 +23,7 @@ class PeerConnectionEntity {
             this.connected = this.peerConnection.connectionState == 'connected';
             if (this.connected) {
                 console.log("Peer connection established!");
+                window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.SESSION_CREATED } }));
             }
         });
     }

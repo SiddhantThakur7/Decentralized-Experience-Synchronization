@@ -31,7 +31,7 @@ class PeerEntity {
     }
 
     InstantiateSession = async () => {
-        var sessionId = await this.server.createNewSession();
+        let sessionId = await this.server.createNewSession();
         this.session = new ExperienceSession(sessionId, window.location.href);
         this.signallingServer = new SignallingServer(sessionId);
         this.signallingServer.registerAnswerHandler(this.CompleteHandshake);
@@ -96,6 +96,17 @@ class PeerEntity {
                 offerIndex: Number(offerIndex)
             }
         );
+        this.dispatchSessionCreationEvent();
+    }
+
+    dispatchSessionCreationEvent = () => {
+        window.dispatchEvent(new CustomEvent(
+            "MESSAGE:MAIN",
+            {
+                detail: {
+                    event: Constants.SESSION_CREATED
+                }
+            }));
     }
 
     CompleteHandshake = async (response) => {
