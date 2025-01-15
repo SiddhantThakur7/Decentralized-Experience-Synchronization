@@ -1,6 +1,5 @@
 // NetflixPlayer.js
 class NetflixPlayer {
-    #actor = true;
     #playingStateChangeAction = () => null;
     #seekAction = () => null;
     #player;
