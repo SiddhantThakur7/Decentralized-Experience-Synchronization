@@ -86,20 +86,17 @@ class PeerEntity {
     }
 
     AnswerSessionRequest = async (connectionAssets) => {
-        try {
-            const { sessionId, url, offer, offerIndex } = connectionAssets;
-            this.session = new ExperienceSession(sessionId, url);
-            await this.CreateConnectionResponse(offer, true);
-            await this.server.answerConnectionRequest(
-                sessionId,
-                {
-                    answer: JSON.stringify(this.answers[0]),
-                    offerIndex: Number(offerIndex)
-                }
-            );
-        } catch (error) {
-            console.error(error);
-        }
+        const { sessionId, url, offer, offerIndex } = connectionAssets;
+        this.session = new ExperienceSession(sessionId, url);
+        await this.CreateConnectionResponse(offer, true);
+        await this.server.answerConnectionRequest(
+            sessionId,
+            {
+                answer: JSON.stringify(this.answers[0]),
+                offerIndex: Number(offerIndex)
+            }
+        );
+        console.error(error);
     }
 
     CompleteHandshake = async (response) => {
