@@ -55,13 +55,15 @@ class PeerEntity {
     }
 
     CreateConnectionRequest = async (isPrimary = false, suffix) => {
-        let connectionEntity = new PeerConnectionEntity(isPrimary);
+        const connectionEntity = new PeerConnectionEntity(isPrimary);
         connectionEntity
             .SetChannelOnOpenAction(this.channelOnOpenHandler)
             .SetChannelOnMessageAction(this.channelOnMessageHandler);
-        this.offers.push(await connectionEntity.Offer(this.peerId, suffix));
+        const offer = await connectionEntity.Offer(this.peerId, suffix)
+        this.offers.push(offer);
         this.answers.push(null);
         this.connections.push(connectionEntity);
+        return offer;
     }
 
     SaveConnectionAssetsAndProceed = () => {
@@ -121,27 +123,32 @@ class PeerEntity {
     }
 
     //Event Handlers
-    channelOnOpenHandler = () => {
+    channelOnOpenHandler = async () => {
         console.log("Channel Opened!");
+        if (this.isPrimary) {
+            await Utils.sleep(2000);
+        }
         window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
+        this.sendSelfOrganizingOfferRequests();
     }
 
     channelOnMessageHandler = async (event) => {
+        console.log("Message Received:", event);
         switch (event.event) {
             case Constants.REMOTE_STREAM_MANIPULATED_EVENT:
                 window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: event }));
-                break;
-            case Constants.SELF_ORGANIZING_OFFER_REQUEST:
-                await this.answerSelfOrganizingOfferRequest(event.connectionIndex);
-                break;
-            case Constants.SELF_ORGANIZING_ANSWER_REQUEST:
-                await this.answerSelfOrganizingAnswerRequest(event.offer, event.connectionIndex, event.offerIndex);
                 break;
             case Constants.SELF_ORGANIZING_OFFER_RESPONSE:
                 this.sendSelfOrganizingAnswerRequests(event.offers, event.connectionIndex);
                 break;
             case Constants.SELF_ORGANIZING_ANSWER_RESPONSE:
                 this.sendSelfOrganizingHandshakeCompletionRequest(event.answer, event.connectionIndex, event.offerIndex);
+                break;
+            case Constants.SELF_ORGANIZING_OFFER_REQUEST:
+                await this.answerSelfOrganizingOfferRequest(event.connectionIndex);
+                break;
+            case Constants.SELF_ORGANIZING_ANSWER_REQUEST:
+                await this.answerSelfOrganizingAnswerRequest(event.offer, event.connectionIndex, event.offerIndex);
                 break;
             case Constants.SELF_ORGANIZING_CONNECTION_REQUEST:
                 await this.CompleteHandshake(event);
@@ -172,6 +179,7 @@ class PeerEntity {
     //Self-Organization Methods
     sendSelfOrganizingOfferRequests = () => {
         for (let i = 1; i < this.connections.length; i++) {
+            if (!this.connections[i].connected) continue;
             this.connections[i].Send({
                 event: Constants.SELF_ORGANIZING_OFFER_REQUEST,
                 connectionIndex: i
@@ -181,6 +189,7 @@ class PeerEntity {
 
     sendSelfOrganizingAnswerRequests = (offers, connectionIndex) => {
         for (let i = 0; i < connectionIndex; i++) {
+            if (!this.connections[i].connected) continue;
             this.connections[i].Send({
                 event: Constants.SELF_ORGANIZING_ANSWER_REQUEST,
                 offer: offers[i],
@@ -191,6 +200,8 @@ class PeerEntity {
     }
 
     sendSelfOrganizingHandshakeCompletionRequest = (answer, connectionIndex, offerIndex) => {
+        if (!this.connections[connectionIndex].connected)
+            return;
         this.connections[connectionIndex].Send({
             event: Constants.SELF_ORGANIZING_CONNECTION_REQUEST,
             answer: answer,
@@ -202,26 +213,21 @@ class PeerEntity {
         for (let i = 0; i < connectionIndex; i++) {
             await this.CreateConnectionRequest(false, i);
         }
-        await this.SendToPrimary({
+
+        this.SendToPrimary({
             event: Constants.SELF_ORGANIZING_OFFER_RESPONSE,
-            offers: this.offers.slice(1),
+            offers: this.offers.map(offer => JSON.stringify(offer)),
             connectionIndex: connectionIndex
-        })
+        });
     }
 
     answerSelfOrganizingAnswerRequest = async (offer, connectionIndex, offerIndex) => {
         const answer = await this.CreateConnectionResponse(offer, false);
-        await this.server.answerConnectionRequest(
-            sessionId,
-            {
-                answer: JSON.stringify(this.answers[0]),
-                offerIndex: Number(offerIndex)
-            });
-        await this.SendToPrimary({
+        this.SendToPrimary({
             event: Constants.SELF_ORGANIZING_ANSWER_RESPONSE,
             answer: JSON.stringify(answer),
             offerIndex: offerIndex,
             connectionIndex: connectionIndex
-        })
+        });
     }
 }

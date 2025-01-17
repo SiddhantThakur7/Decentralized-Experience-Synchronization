@@ -130,12 +130,12 @@ class PeerConnectionChannel {
         this.remoteStreamEventAction = action;
     }
 
-    SetOnOpenAction = async (action) => {
-        this.onOpenAction = action;
+    SetOnOpenAction = (action) => {
+        this.onOpenAction = async () => await action();
     }
 
-    SetOnMessageAction = async (action) => {
-        this.onMessageAction = (event) => action(JSON.parse(event.data));
+    SetOnMessageAction = (action) => {
+        this.onMessageAction = async (event) => await action(JSON.parse(event.data));
     }
 
     Send = (message) => {

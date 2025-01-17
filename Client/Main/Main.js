@@ -41,11 +41,11 @@ class Main {
         }
     }
 
-    clientEventHandler = async (event) => {
+    clientEventHandler = (event) => {
         // console.log(event.detail);
         switch (event.detail.event) {
             case Constants.REMOTE_STREAM_MANIPULATED_EVENT:
-                await this.peer.Broadcast(event.detail);
+                this.peer.Broadcast(event.detail);
                 break;
             case Constants.SESSION_CREATED:
                 this.extensionPort.postMessage(event.detail);

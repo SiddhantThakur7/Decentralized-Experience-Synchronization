@@ -30,6 +30,7 @@
         "Connections/PeerConnectionEntity.js",
         "Connections/ExperienceSession.js",
         "Storage/ChromeStorage.js",
+        "Utils.js",
         "Connections/PeerEntity.js",
         "Main/Main.js"
       ],
@@ -48,6 +49,7 @@
         "Player/Platforms/NetflixPlayer.js",
         "Player/Platforms/YouTubePlayer.js",
         "Player/Player.js",
+        "Utils.js",
         "Client/client.js"
       ],
       "all_frames": true,

@@ -39,6 +39,7 @@ class Client {
                 else {
                     this.player.pauseAt(evt.timestamp);
                 }
+                break;
             case Constants.CREATE_SESSION:
                 if (!this.player) {
                     this.player = await this.setupPlayer();
