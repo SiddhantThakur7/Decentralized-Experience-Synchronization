@@ -8,6 +8,7 @@ class PeerEntity {
     server = null;
     signallingServer = null;
     chromeStorage = null;
+    connectedCount = null;
 
     constructor() {
         this.peerId = Date.now();
@@ -58,7 +59,8 @@ class PeerEntity {
         const connectionEntity = new PeerConnectionEntity(isPrimary);
         connectionEntity
             .SetChannelOnOpenAction(this.channelOnOpenHandler)
-            .SetChannelOnMessageAction(this.channelOnMessageHandler);
+            .SetChannelOnMessageAction(this.channelOnMessageHandler)
+            .SetChannelOnCloseAction(this.channelOnCloseHandler);
         const offer = await connectionEntity.Offer(this.peerId, suffix)
         this.offers.push(offer);
         this.answers.push(null);
@@ -112,7 +114,8 @@ class PeerEntity {
         const connectionEntity = new PeerConnectionEntity(isPrimary);
         connectionEntity
             .SetChannelOnOpenAction(this.channelOnOpenHandler)
-            .SetChannelOnMessageAction(this.channelOnMessageHandler);
+            .SetChannelOnMessageAction(this.channelOnMessageHandler)
+            .SetChannelOnCloseAction(this.channelOnCloseHandler);
         const answer = await connectionEntity.Answer(JSON.parse(remoteSdp));
         this.answers.push(answer);
         this.connections.push(connectionEntity);
@@ -124,12 +127,20 @@ class PeerEntity {
 
     //Event Handlers
     channelOnOpenHandler = async () => {
+        this.connectedCount += 1;
         console.log("Channel Opened!");
         if (this.isPrimary) {
-            await Utils.sleep(2000);
+            await Utils.sleep(5000);
+            window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
+            if (this.isPrimary) this.sendSelfOrganizingOfferRequests();
+        } else {
+            window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
         }
-        window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
-        this.sendSelfOrganizingOfferRequests();
+    }
+
+    channelOnCloseHandler = async () => {
+        this.connectedCount -= 1;
+        console.log("Channel Closed!");
     }
 
     channelOnMessageHandler = async (event) => {

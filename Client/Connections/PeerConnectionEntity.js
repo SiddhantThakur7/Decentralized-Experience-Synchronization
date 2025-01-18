@@ -89,6 +89,11 @@ class PeerConnectionEntity {
         return this;
     }
 
+    SetChannelOnCloseAction = (action) => {
+        this.channel.SetOnCloseAction(action);
+        return this;
+    }
+
     Send = (message) => {
         this.channel.Send(message);
     }
@@ -99,6 +104,7 @@ class PeerConnectionChannel {
     pc = null;
     onOpenAction = () => console.log("Channel created!");
     onMessageAction = () => null;
+    onCloseAction = () => null;
     onErrorAction = (error) => console.log(error);
 
     constructor(peerConnection) {
@@ -115,6 +121,7 @@ class PeerConnectionChannel {
         this.channel.onopen = this.onOpenAction;
         this.channel.onmessage = this.onMessageAction;
         this.channel.onerror = this.onErrorAction;
+        this.channel.onclose = this.onCloseAction;
     }
 
     Discover = () => {
@@ -123,6 +130,7 @@ class PeerConnectionChannel {
             this.channel.onopen = this.onOpenAction;
             this.channel.onmessage = this.onMessageAction;
             this.channel.onerror = this.onErrorAction;
+            this.channel.onclose = this.onCloseAction;
         }
     }
 
@@ -136,6 +144,10 @@ class PeerConnectionChannel {
 
     SetOnMessageAction = (action) => {
         this.onMessageAction = async (event) => await action(JSON.parse(event.data));
+    }
+
+    SetOnCloseAction = (action) => {
+        this.onCloseAction = async () => await action();
     }
 
     Send = (message) => {
