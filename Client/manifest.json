@@ -20,19 +20,7 @@
         "http://localhost:8080/*"
       ],
       "js": [
-        "Constants/Constants.js",
-        "Player/Platforms/NetflixPlayer.js",
-        "Player/Platforms/YouTubePlayer.js",
-        "Player/Player.js",
-        "Socket/Socket.js",
-        "Signalling/Server.js",
-        "Signalling/SignallingServer.js",
-        "Connections/PeerConnectionEntity.js",
-        "Connections/ExperienceSession.js",
-        "Storage/ChromeStorage.js",
-        "Utils.js",
-        "Connections/PeerEntity.js",
-        "Main/Main.js"
+        "build/main_bundle.js"
       ],
       "run_at": "document_start",
       "all_frames": true,
@@ -45,12 +33,7 @@
         "http://localhost:8080/*"
       ],
       "js": [
-        "Constants/Constants.js",
-        "Player/Platforms/NetflixPlayer.js",
-        "Player/Platforms/YouTubePlayer.js",
-        "Player/Player.js",
-        "Utils.js",
-        "Client/client.js"
+        "build/client_bundle.js"
       ],
       "all_frames": true,
       "world": "MAIN",
