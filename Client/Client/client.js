@@ -1,4 +1,7 @@
 
+import Constants from "../Constants/Constants.js";
+import Player from "../Player/Player.js";
+
 class Client {
     player = null;
 
@@ -68,7 +71,8 @@ class Client {
 }
 
 var client = null;
-window.addEventListener("load", async () => {
+window.addEventListener("load", () => {
     client = new Client();
+    console.log(`client = `, client);
 });
 

@@ -1,3 +1,4 @@
+import Constants from '../Constants/Constants.js';
 class PeerConnectionEntity {
     offer = null;
     answer = null;
@@ -156,3 +157,5 @@ class PeerConnectionChannel {
         this.channel.send(JSON.stringify(message));
     }
 }
+
+export default PeerConnectionEntity;

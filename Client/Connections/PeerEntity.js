@@ -1,3 +1,11 @@
+import Constants from '../Constants/Constants.js';
+import PeerConnectionEntity from './PeerConnectionEntity.js';
+import ChromeStorage from '../Storage/ChromeStorage.js';
+import ExperienceSession from './ExperienceSession.js';
+import Server from '../Signalling/Server.js'
+import SignallingServer from '../Signalling/SignallingServer.js'
+import Utils from '../Utils.js';
+
 class PeerEntity {
     PEER_LIMIT = 5;
     peerId = null;
@@ -242,3 +250,5 @@ class PeerEntity {
         });
     }
 }
+
+export default PeerEntity;

@@ -9,7 +9,7 @@
     "default_title": "Capstone Project"
   },
   "background": {
-    "service_worker": "Storage/StorageWorker.js",
+    "service_worker": "dist/service_bundle.js",
     "type": "module"
   },
   "content_scripts": [
@@ -20,11 +20,10 @@
         "http://localhost:8080/*"
       ],
       "js": [
-        "build/main_bundle.js"
+        "dist/main_bundle.js"
       ],
       "run_at": "document_start",
-      "all_frames": true,
-      "type": "module"
+      "all_frames": true
     },
     {
       "matches": [
@@ -33,11 +32,10 @@
         "http://localhost:8080/*"
       ],
       "js": [
-        "build/client_bundle.js"
+        "dist/client_bundle.js"
       ],
       "all_frames": true,
-      "world": "MAIN",
-      "type": "module"
+      "world": "MAIN"
     }
   ],
   "externally_connectable": {

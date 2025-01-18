@@ -1,20 +1,4 @@
-// var tabId = null;
-// var contentScriptConnection = null;
-// var webpageConnection = null;
-// var statusDisplay = null;
-// var connectionForm = null;
-// var answer = null;
-// var channel = null;
-
-// const servers = {
-//   iceServers: [
-//     {
-//       urls: Constants.STUN_SERVERS
-//     }
-//   ],
-//   iceCandidatePoolSize: Constants.ICE_CANDIDATE_POOL_SIZE
-// };
-// var pc = new RTCPeerConnection(servers);
+import Constants from "../Constants/Constants.js";
 
 class Extension {
   mainPort = null;

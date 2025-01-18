@@ -1,3 +1,4 @@
+import Constants from '../Constants/Constants.js';
 class ChromeStorage {
     storagePort = null;
 
@@ -36,3 +37,5 @@ class ChromeStorage {
         return promise;
     }
 }
+
+export default ChromeStorage;

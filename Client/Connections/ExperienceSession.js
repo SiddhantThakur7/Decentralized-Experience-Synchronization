@@ -15,3 +15,5 @@ class ExperienceSession {
     this.primaryPeerConnection = peerConnection;
   };
 }
+
+export default ExperienceSession;

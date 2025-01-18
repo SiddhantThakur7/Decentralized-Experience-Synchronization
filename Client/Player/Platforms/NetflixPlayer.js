@@ -1,4 +1,5 @@
 // NetflixPlayer.js
+import Utils from '../../Utils.js';
 class NetflixPlayer {
     #playingStateChangeAction = () => null;
     #seekAction = () => null;
@@ -19,26 +20,10 @@ class NetflixPlayer {
         return window.netflix.appContext.state.playerApp.getAPI().videoPlayer;
     }
 
-    #throttledRetry = async (callback) => {
-        for (let i = 0; i < 5; i++) {
-            let result = callback();
-            console.log(result, Boolean(result))
-            if (result)
-                return result;
-            await this.#sleep(i * 500);
-        }
-        console.log("All retry attempts exhausted!");
-    }
-
-    #sleep = (ms) => {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
     // publicly accessible methods
-
     instantiate = async () => {
         this.#playerWrapper = this.#getPlayerWrapperReference();
-        this.#player = await this.#throttledRetry(this.#getPlayerReference);
+        this.#player = await Utils.throttledRetry(this.#getPlayerReference);
     }
 
     setplayingStateChangeAction = (action) => {
@@ -77,3 +62,5 @@ class NetflixPlayer {
         return this.#player.isPlaying();
     }
 }
+
+export default NetflixPlayer;

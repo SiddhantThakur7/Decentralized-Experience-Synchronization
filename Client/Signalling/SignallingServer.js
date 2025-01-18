@@ -1,3 +1,5 @@
+import * as io from '../Socket/Socket.js';
+
 class SignallingServer {
     apiEndpoint = null;
     sessionId = null;
@@ -21,3 +23,5 @@ class SignallingServer {
         this.socket.emit('offer', JSON.stringify(data));
     }
 }
+
+export default SignallingServer;

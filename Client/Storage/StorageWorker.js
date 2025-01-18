@@ -1,4 +1,4 @@
-import Constants2 from '../Constants/Constants2.js';
+import Constants from '../Constants/Constants.js';
 
 var storage = null;
 var currentUrl = null;
@@ -17,7 +17,7 @@ class StorageWorker {
 
     setupCommunicationChannels = () => {
         chrome.runtime.onConnect.addListener((port) => {
-            if (port.name == Constants2.MAIN_STORAGE_PORT) {
+            if (port.name == Constants.MAIN_STORAGE_PORT) {
                 this.clientPort = port;
                 this.clientPort.onMessage.addListener(this.eventHandler);
             }
@@ -26,10 +26,10 @@ class StorageWorker {
 
     eventHandler = async (event) => {
         switch (event.event) {
-            case Constants2.STORAGE_SET:
+            case Constants.STORAGE_SET:
                 await this.set(event.key, event.value);
                 break;
-            case Constants2.STORAGE_GET:
+            case Constants.STORAGE_GET:
                 await this.get(event.key);
                 break;
             default:

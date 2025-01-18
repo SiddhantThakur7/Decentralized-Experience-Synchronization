@@ -68,3 +68,5 @@ class YouTubePlayer {
         return !this.#player.paused;
     }
 }
+
+export default YouTubePlayer;

@@ -1,3 +1,6 @@
+import Constants from "../Constants/Constants.js";
+import PeerEntity from "../Connections/PeerEntity.js";
+
 class Main {
     extensionPort = null;
     peer = null;

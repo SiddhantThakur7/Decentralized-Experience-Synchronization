@@ -1,3 +1,6 @@
+import YouTubePlayer from './Platforms/YouTubePlayer.js';
+import NetflixPlayer from './Platforms/NetflixPlayer.js';
+
 class Player {
     #player;
     #postEventAction;
@@ -74,3 +77,5 @@ class Player {
         this.seekTo(timestamp);
     }
 }
+
+export default Player;
