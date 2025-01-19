@@ -1,10 +1,15 @@
 require("dotenv").config();
 const { createClient } = require('redis');
+const lock = require("redis-lock");
 const CacheRecord = require("../Models/CacheRecord");
 
 class Redisclient {
     client = null;
-    constructor() { }
+    lockClient = null;
+    sessionLockMap = null;
+    constructor() {
+        this.sessionLockMap = new Map();
+    }
 
     instantiate = async () => {
         let client = createClient({
@@ -16,6 +21,7 @@ class Redisclient {
             }
         });
         client.on('error', err => console.log('Redis Client Error', err));
+        this.lockClient = lock(client);
         await client.connect();
         this.client = client;
         return this;
@@ -29,6 +35,16 @@ class Redisclient {
     set = async (cacheKey, value) => {
         const cacheValue = JSON.stringify(new CacheRecord(value));
         await this.client.set(cacheKey, cacheValue);
+    }
+
+    lock = async (cacheKey) => {
+        this.sessionLockMap.set(cacheKey, await this.lockClient(cacheKey));
+    }
+
+    unlock = async (cacheKey) => {
+        const unlock = this.sessionLockMap.get(cacheKey);
+        this.sessionLockMap.delete(cacheKey);
+        if (unlock) unlock();
     }
 }
 

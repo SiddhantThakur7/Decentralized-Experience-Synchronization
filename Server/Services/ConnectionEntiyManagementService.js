@@ -24,12 +24,15 @@ class ConnectionEntityManagementService {
 
     getUniqueOffer = async (sessionId) => {
         let offer = null;
-        // await this.dataLayer.lock(sessionId);
+        await this.dataLayer.lock(sessionId);
+
         const session = await this.dataLayer.get(sessionId);
-        const offerIndex = session.consumed % 5;
+        const offerIndex = session.consumed;
         offer = new Offer(JSON.parse(session.connections[offerIndex].offer), offerIndex);
         session.consumed += 1;
         await this.dataLayer.set(sessionId, session);
+
+        await this.dataLayer.unlock(sessionId);
         return {
             offer: offer,
             url: session.url
