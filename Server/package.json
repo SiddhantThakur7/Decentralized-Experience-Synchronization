@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cp -r Models/. ../Client/Models/ && nodemon index.js",
+    "start": "nodemon index.js",
     "debug": "nodemon index.js"
   },
   "author": "siddhant thakur",
