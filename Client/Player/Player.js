@@ -70,11 +70,13 @@ class Player {
     playFrom = (timestamp) => {
         this.seekTo(timestamp);
         this.play();
+        this.actor = true;
     }
 
     pauseAt = (timestamp) => {
         this.pause();
         this.seekTo(timestamp);
+        this.actor = true;
     }
 }
 

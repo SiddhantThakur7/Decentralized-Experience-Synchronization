@@ -32,9 +32,9 @@ class Redisclient {
         return result ? JSON.parse(result).data : null;
     }
 
-    set = async (cacheKey, value) => {
+    set = async (cacheKey, value, expiry = 20000) => {
         const cacheValue = JSON.stringify(new CacheRecord(value));
-        await this.client.set(cacheKey, cacheValue);
+        await this.client.set(cacheKey, cacheValue, { EX: expiry });
     }
 
     lock = async (cacheKey) => {
