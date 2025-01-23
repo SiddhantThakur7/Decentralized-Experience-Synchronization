@@ -20,7 +20,7 @@ class Client {
                 "MESSAGE:MAIN",
                 {
                     detail: {
-                        event: Constants.REMOTE_STREAM_MANIPULATED_EVENT,
+                        event: Constants.REMOTE_STREAM_MANIPULATED_EVENT,                   
                         playState: videoPlayer.currentPlayState(),
                         timestamp: videoPlayer.currentTimestamp()
                     }
@@ -71,8 +71,7 @@ class Client {
 }
 
 var client = null;
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
     client = new Client();
-    console.log(`client = `, client);
 });
 
