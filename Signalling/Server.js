@@ -1,7 +1,7 @@
 class Server {
     apiEndpoint = null;
     constructor() {
-        this.apiEndpoint = "http://localhost:8080"
+        this.apiEndpoint = "https://decentralized-experience-synchronization.onrender.com/"
     }
 
     createNewSession = async () => {

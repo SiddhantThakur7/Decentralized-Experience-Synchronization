@@ -29,7 +29,8 @@
       "matches": [
         "https://www.netflix.com/*",
         "https://www.youtube.com/*",
-        "http://localhost:8080/*"
+        "http://localhost:8080/*",
+        "https://decentralized-experience-synchronization.onrender.com/*"
       ],
       "js": [
         "dist/client_bundle.js"
@@ -45,7 +46,7 @@
     ]
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self' http://localhost:8080; ws://localhost:8080;"
+    "extension_pages": "script-src 'self'; object-src 'self' http://localhost:8080; ws://localhost:8080; https://decentralized-experience-synchronization.onrender.com/*; ws://decentralized-experience-synchronization.onrender.com;"
   },
   "permissions": [
     "scripting",

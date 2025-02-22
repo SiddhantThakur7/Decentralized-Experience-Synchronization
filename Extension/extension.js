@@ -31,7 +31,7 @@ class Extension {
     switch (event.event) {
       case Constants.CREATE_SESSION:
       case Constants.SESSION_CREATED:
-        document.getElementById('local-description').value = `http://localhost:8080/session/access/${event.sessionId}`;
+        document.getElementById('local-description').value = `https://decentralized-experience-synchronization.onrender.com/session/access/${event.sessionId}`;
         document.getElementById('create-session-button').display = 'none';
         break;
       default:

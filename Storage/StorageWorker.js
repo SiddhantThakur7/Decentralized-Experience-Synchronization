@@ -5,7 +5,8 @@ var currentUrl = null;
 var INTERESTED_URLS = [
     "https://www.netflix.com/",
     "https://www.youtube.com/",
-    "http://localhost:8080/"
+    "http://localhost:8080/",
+    "https://decentralized-experience-synchronization.onrender.com/"
 ]
 
 class StorageWorker {
