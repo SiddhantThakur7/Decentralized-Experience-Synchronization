@@ -25,7 +25,9 @@ class PeerEntity {
     }
 
     instantiate = async () => {
-        if (window.location.origin.includes('localhost:8080' || 'decentralized-experience-synchronization.onrender.com')) { //Todo: Change 'app' to domain name of the hosted app
+        if (window.location.origin.includes('decentralized-experience-synchronization.onrender.com')
+            || window.location.origin.includes('decentralized-experience-synchronization.onrender.com')
+        ) { //Todo: Change 'app' to domain name of the hosted app
             await this.SaveConnectionAssetsAndProceed();
         } else {
             const connectionAssets = await this.ConnectionAssetsExist();

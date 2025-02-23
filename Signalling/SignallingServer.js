@@ -6,7 +6,7 @@ class SignallingServer {
     socket = null;
 
     constructor(sessionId = "") {
-        this.apiEndpoint = "https://decentralized-experience-synchronization.onrender.com/"
+        this.apiEndpoint = "https://decentralized-experience-synchronization.onrender.com"
         this.sessionId = sessionId;
         if (sessionId) this.establishConnection();
     }
