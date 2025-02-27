@@ -1,0 +1,16 @@
+{
+  "name": "p2p-experience-synchronization-client-evaluation",
+  "version": "1.0.0",
+  "main": "test.js",
+  "scripts": {
+    "test": "npx webpack && node test-app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "puppeteer": "^24.2.1"
+  }
+}

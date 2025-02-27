@@ -12,6 +12,7 @@ class SignallingServer {
     }
 
     establishConnection = () => {
+        console.log(io);
         this.socket = io(`${this.apiEndpoint}/${this.sessionId}`);
     }
 

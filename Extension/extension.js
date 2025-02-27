@@ -24,6 +24,9 @@ class Extension {
           }
         );
       });
+    document.getElementById("injectButton").addEventListener("click", () => {
+      this.mainPort.postMessage({ event: 'Inject', type: 'chat' });
+    });
   }
 
   eventHandler = (event) => {

@@ -21,16 +21,20 @@ class PeerEntity {
     constructor() {
         this.peerId = Date.now();
         this.server = new Server();
-        this.chromeStorage = new ChromeStorage();
+        try {
+            this.chromeStorage = new ChromeStorage();
+        } catch (error) {
+
+        }
     }
 
-    instantiate = async () => {
+    instantiate = async (overrideData) => {
         if (window.location.origin.includes('decentralized-experience-synchronization.onrender.com')
             || window.location.origin.includes('decentralized-experience-synchronization.onrender.com')
         ) { //Todo: Change 'app' to domain name of the hosted app
             await this.SaveConnectionAssetsAndProceed();
         } else {
-            const connectionAssets = await this.ConnectionAssetsExist();
+            const connectionAssets = overrideData ?? await this.ConnectionAssetsExist();
             if (connectionAssets) {
                 this.isPrimary = false;
                 await this.AnswerSessionRequest(connectionAssets);
@@ -48,9 +52,9 @@ class PeerEntity {
         this.signallingServer.registerAnswerHandler(this.CompleteHandshake);
     }
 
-    CreateSessionRequest = async () => {
+    CreateSessionRequest = async (peerCount = null) => {
         await this.InstantiateSession();
-        for (let i = 0; i < this.PEER_LIMIT; i++) {
+        for (let i = 0; i < (peerCount ?? this.PEER_LIMIT); i++) {
             await this.CreateConnectionRequest(true, i);
         }
         await this.signallingServer.push({
@@ -68,7 +72,7 @@ class PeerEntity {
     CreateConnectionRequest = async (isPrimary = false, suffix) => {
         const connectionEntity = new PeerConnectionEntity(isPrimary);
         connectionEntity
-            .SetChannelOnOpenAction(this.channelOnOpenHandler)
+            .SetChannelOnOpenAction(() => this.channelOnOpenHandler(suffix))
             .SetChannelOnMessageAction(this.channelOnMessageHandler)
             .SetChannelOnCloseAction(this.channelOnCloseHandler);
         const offer = await connectionEntity.Offer(this.peerId, suffix)
@@ -123,7 +127,7 @@ class PeerEntity {
     CreateConnectionResponse = async (remoteSdp, isPrimary = false) => {
         const connectionEntity = new PeerConnectionEntity(isPrimary);
         connectionEntity
-            .SetChannelOnOpenAction(this.channelOnOpenHandler)
+            .SetChannelOnOpenAction(() => this.channelOnOpenHandler(this.connections.length))
             .SetChannelOnMessageAction(this.channelOnMessageHandler)
             .SetChannelOnCloseAction(this.channelOnCloseHandler);
         const answer = await connectionEntity.Answer(JSON.parse(remoteSdp));
@@ -136,13 +140,13 @@ class PeerEntity {
     }
 
     //Event Handlers
-    channelOnOpenHandler = async () => {
+    channelOnOpenHandler = async (index) => {
         this.connectedCount += 1;
-        console.log("Channel Opened!");
+        console.log("Channel Opened!", index);
         if (this.isPrimary) {
             await Utils.sleep(5000);
             window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
-            if (this.isPrimary) this.sendSelfOrganizingOfferRequests();
+            if (this.connectedCount > 1) this.sendSelfOrganizingOfferRequests(index);
         } else {
             window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
         }
@@ -174,6 +178,9 @@ class PeerEntity {
             case Constants.SELF_ORGANIZING_CONNECTION_REQUEST:
                 await this.CompleteHandshake(event);
                 break;
+            case Constants.REMOTE_STREAM_MANIPULATED_EVENT:
+                window.dispatchEvent(new CustomEvent("MESSAGE:CHAT", { detail: event }));
+                break;
             default:
                 console.log("No listener found:", event);
                 break;
@@ -198,14 +205,12 @@ class PeerEntity {
     }
 
     //Self-Organization Methods
-    sendSelfOrganizingOfferRequests = () => {
-        for (let i = 1; i < this.connections.length; i++) {
-            if (!this.connections[i].connected) continue;
-            this.connections[i].Send({
-                event: Constants.SELF_ORGANIZING_OFFER_REQUEST,
-                connectionIndex: i
-            });
-        }
+    sendSelfOrganizingOfferRequests = (index) => {
+        if (!this.connections[index].connected) return;
+        this.connections[index].Send({
+            event: Constants.SELF_ORGANIZING_OFFER_REQUEST,
+            connectionIndex: index
+        });
     }
 
     sendSelfOrganizingAnswerRequests = (offers, connectionIndex) => {

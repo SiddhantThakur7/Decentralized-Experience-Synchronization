@@ -1,9 +1,10 @@
 import Constants from "../Constants/Constants.js";
 import PeerEntity from "../Connections/PeerEntity.js";
-
+import Chat from "../Chat/Chat.js";
 class Main {
     extensionPort = null;
     peer = null;
+    chatController = null;
 
     constructor() {
         this.setupCommunicationChannels();
@@ -38,6 +39,10 @@ class Main {
             case Constants.EXTENSION_MAIN_CONNECTION_ESTABLISHED:
                 console.log(event);
                 break;
+            case 'Inject':
+                if (!this.chatController) this.chatController = new Chat(this.peer.session.sessionId);
+                this.chatController.inject();
+                break;
             default:
                 console.log("No listener found:", event);
                 break;
@@ -54,6 +59,12 @@ class Main {
                 this.extensionPort.postMessage(event.detail);
                 window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: event.detail }));
                 break;
+            case Constants.CHAT_MESSAGE:
+                this.peer.Broadcast({
+                    event: Constants.CHAT_MESSAGE,
+                    message: event.detail.message,
+                    originator: this.peer.peerId
+                });
             default:
                 console.log("No listener found:", event);
                 break;
