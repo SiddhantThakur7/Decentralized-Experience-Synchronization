@@ -1,0 +1,105 @@
+<div class="chat-container">
+  <style>
+    .chat-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 320px;
+      background: #1e1e1e; /* Dark background */
+      border: 1px solid #333;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      z-index: 9999999999; /* High to stay above other elements */
+      color: #ffffff; /* Light text */
+      font-family: Arial, sans-serif;
+    }
+
+    .messages {
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 10px;
+      border-bottom: 1px solid #444;
+      background: #252525; /* Darker background */
+    }
+
+    .message {
+      margin-bottom: 12px;
+    }
+
+    .message.right {
+      text-align: right;
+    }
+
+    .message.left {
+      text-align: left;
+    }
+
+    .sender-name {
+      font-weight: bold;
+      color: #bbb; /* Lighter gray */
+    }
+
+    .message-content {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 80%;
+    }
+
+    .message.right .message-content {
+      background: #0078ff;
+      color: #fff;
+    }
+
+    .message.left .message-content {
+      background: #333;
+      color: #ddd;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background: #1e1e1e;
+    }
+
+    .input-area input {
+      flex: 1;
+      background: #252525;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 8px;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    .input-area input::placeholder {
+      color: #aaa;
+    }
+
+    .input-area button {
+      background: #0078ff;
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+
+    .input-area button:hover {
+      background: #005bbf;
+    }
+  </style>
+
+  <!-- Messages Display Area -->
+  <div class="messages">
+    <!-- User and Other person messages will be dynamically added -->
+  </div>
+
+  <!-- Input and Send Button -->
+  <div class="input-area">
+    <input type="text" id="message-input" placeholder="Type a message..." />
+    <button id="send-message">Send</button>
+  </div>
+</div>

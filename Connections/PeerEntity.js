@@ -75,6 +75,9 @@ class PeerEntity {
         this.offers.push(offer);
         this.answers.push(null);
         this.connections.push(connectionEntity);
+
+        // NEW: Setup track listener on the connection
+        this.setupTrackListener(connectionEntity.peerConnection);
         return offer;
     }
 
@@ -132,6 +135,8 @@ class PeerEntity {
         if (isPrimary) {
             this.session.SetPrimaryPeerConnection(connectionEntity);
         }
+        // NEW: Setup track listener on the connection
+        this.setupTrackListener(connectionEntity.peerConnection);
         return answer;
     }
 
@@ -174,6 +179,18 @@ class PeerEntity {
             case Constants.SELF_ORGANIZING_CONNECTION_REQUEST:
                 await this.CompleteHandshake(event);
                 break;
+            case Constants.CHAT_MESSAGE:
+                window.dispatchEvent(new CustomEvent("MESSAGE:CHAT", { detail: event }));
+                break;
+            case Constants.VIDEO_MESSAGE:
+                //console.log("Dispatching MESSAGE:VIDEO event");
+                this.connections.forEach(connection => {
+                    if (connection.connected) {
+                        console.log("At Receiver End the Track:", connection.peerConnection.getSenders().find(s => s.track.kind === 'video').track);
+                    }
+                });
+                window.dispatchEvent(new CustomEvent("MESSAGE:VIDEO", { detail: event }));
+                break;
             default:
                 console.log("No listener found:", event);
                 break;
@@ -189,12 +206,66 @@ class PeerEntity {
     }
 
     Broadcast = (message) => {
+        console.log("Broadcasting method message:", message);
+        console.log("Current connections:", this.connections); // Log all connections
         this.connections.forEach(
             connection =>
                 connection.connected
                     ? connection.Send(message) :
                     null
         );
+    }
+
+    broadcastStream = (stream) => {
+        if (!stream) {
+            console.log("No stream to broadcast.");
+            return;
+        }
+    
+        console.log("Broadcasting stream to peers:", stream.getVideoTracks()[0]);
+        this.connections.forEach(connection => {
+            if (connection.connected) {
+                console.log("Connection video track before replacing:", connection.peerConnection.getSenders().find(s => s.track.kind === 'video').track);
+                connection.replaceTrack(stream.getVideoTracks()[0]);
+            }
+        });     
+    };
+
+    setupTrackListener = (peerConnection) => {
+        if (!peerConnection) return;
+        console.log("Setting up track listener on peerConnection:", peerConnection.getSenders());
+        
+        // Ensure trackedReceivers is initialized
+        this.trackedReceivers = this.trackedReceivers || [];
+        
+        peerConnection.ontrack = (event) => {
+            console.log("Received remote track:", event.track);
+            //console.log("Received remote stream:", event.streams[0]);
+            
+            window.dispatchEvent(new CustomEvent("MESSAGE:VIDEO", {
+                detail: { stream: event.streams[0] }
+            }));
+        };
+        
+        // Periodically check for new tracks
+        setInterval(() => {
+            peerConnection.getReceivers().forEach(receiver => {
+                if (this.trackedReceivers && !this.trackedReceivers.includes(receiver.track)) {
+                    this.trackedReceivers.push(receiver.track);
+                    console.log("New track added:", receiver.track);
+                }
+            });
+        }, 1000); 
+    };
+
+    stopBroadcastStream = () => {
+        this.connections.forEach(connection => {
+            connection.getSenders().forEach(sender => {
+                if (sender.track.kind === 'video') {
+                    connection.removeTrack(sender);
+                }
+            });
+        });
     }
 
     //Self-Organization Methods

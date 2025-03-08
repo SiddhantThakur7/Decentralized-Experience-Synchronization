@@ -47,6 +47,10 @@ class Client {
                     this.player = await this.setupPlayer();
                 }
                 break;
+            case Constants.CHAT_MESSAGE:                                            // Chat message received
+                console.log("Received chat message:", evt);
+                window.dispatchEvent(new CustomEvent("chat-message", { detail: evt }));
+                break;    
             case Constants.PEER_CONNECTED:
                 if (!this.player) {
                     this.player = await this.setupPlayer();

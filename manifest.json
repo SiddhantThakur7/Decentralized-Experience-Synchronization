@@ -12,6 +12,21 @@
     "service_worker": "dist/service_bundle.js",
     "type": "module"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "Chat/chat.html",
+        "Chat/message.html",
+        "Video/video.html"
+      ],
+      "matches": [
+        "https://www.netflix.com/*",
+        "https://www.youtube.com/*",
+        "http://localhost:8080/*",
+        "https://decentralized-experience-synchronization.onrender.com/*"
+      ]
+    }
+  ],
   "content_scripts": [
     {
       "matches": [

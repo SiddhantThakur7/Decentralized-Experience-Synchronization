@@ -1,0 +1,98 @@
+/* General Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Chat Container */
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures input stays at the bottom */
+    height: 100%;
+    background-color: #2b2b2b;
+    color: #f5f5f5;
+    padding: 10px;
+  }
+  
+  /* Messages Display Area */
+  .messages {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Spacing between messages */
+    overflow-y: auto; /* Scrollable area for messages */
+    padding: 10px;
+    background-color: #333333;
+    border-radius: 8px;
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Individual Message Styling */
+  .message {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .message.left {
+    align-self: flex-start;
+    background-color: #444;
+  }
+  
+  .message.right {
+    align-self: flex-end;
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  /* Name Styling */
+  .message .sender-name {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    font-weight: bold;
+  }
+  
+  .message.left .sender-name {
+    text-align: left; /* Aligns name to the left */
+    color: #ddd;
+  }
+  
+  .message.right .sender-name {
+    text-align: right; /* Aligns name to the right */
+    color: #aad4ff;
+  }
+  
+  /* Input and Send Button Area */
+  .input-area {
+    display: flex;
+    gap: 10px; /* Space between input and button */
+  }
+  
+  .input-area input {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background-color: #3b3b3b;
+    color: white;
+  }
+  
+  .input-area button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .input-area button:hover {
+    background-color: #0056b3;
+  }
+  

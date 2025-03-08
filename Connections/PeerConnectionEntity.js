@@ -1,4 +1,5 @@
 import Constants from '../Constants/Constants.js';
+
 class PeerConnectionEntity {
     offer = null;
     answer = null;
@@ -27,6 +28,38 @@ class PeerConnectionEntity {
                 console.log("Peer connection established!");
             }
         });
+        // Add empty tracks
+            this.addEmptyTracks();
+    }
+
+    addEmptyTracks = () => {
+        const emptyAudioTrack = this.createEmptyTrack('audio');
+        const emptyVideoTrack = this.createEmptyTrack('video');
+        this.peerConnection.addTrack(emptyAudioTrack);
+        this.peerConnection.addTrack(emptyVideoTrack);
+    }
+
+    createEmptyTrack = (kind) => {
+        if (kind === 'audio') {
+            const ctx = new AudioContext();
+            const oscillator = ctx.createOscillator();
+            const dst = oscillator.connect(ctx.createMediaStreamDestination());
+            oscillator.start();
+            return dst.stream.getAudioTracks()[0];
+        } else if (kind === 'video') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 640;
+            canvas.height = 480;
+            const stream = canvas.captureStream();
+            return stream.getVideoTracks()[0];
+        }
+    }
+
+    replaceTrack = (track) => {
+        const senders = this.peerConnection.getSenders().find(sender => sender.track.kind === track.kind);
+        senders.replaceTrack(track);
+        //log connections to see if the track was replaced
+        console.log('Connections after track replacement:', this.peerConnection.getSenders());
     }
 
     SetLocalDescription = async (sdp) => {
@@ -123,6 +156,9 @@ class PeerConnectionChannel {
         this.channel.onmessage = this.onMessageAction;
         this.channel.onerror = this.onErrorAction;
         this.channel.onclose = this.onCloseAction;
+
+        // // Add empty tracks
+        // this.addEmptyTracks();
     }
 
     Discover = () => {
@@ -132,11 +168,40 @@ class PeerConnectionChannel {
             this.channel.onmessage = this.onMessageAction;
             this.channel.onerror = this.onErrorAction;
             this.channel.onclose = this.onCloseAction;
+
+            // // Add empty tracks
+            // this.addEmptyTracks();
         }
     }
 
-    SetRemoteStreamEventAction = (action) => {
-        this.remoteStreamEventAction = action;
+    addEmptyTracks = () => {
+        const emptyAudioTrack = this.createEmptyTrack('audio');
+        const emptyVideoTrack = this.createEmptyTrack('video');
+        this.pc.addTrack(emptyAudioTrack);
+        this.pc.addTrack(emptyVideoTrack);
+    }
+
+    createEmptyTrack = (kind) => {
+        if (kind === 'audio') {
+            const ctx = new AudioContext();
+            const oscillator = ctx.createOscillator();
+            const dst = oscillator.connect(ctx.createMediaStreamDestination());
+            oscillator.start();
+            return dst.stream.getAudioTracks()[0];
+        } else if (kind === 'video') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 640;
+            canvas.height = 480;
+            const stream = canvas.captureStream();
+            return stream.getVideoTracks()[0];
+        }
+    }
+
+    replaceTrack = (track) => {
+        const senders = this.pc.getSenders().find(sender => sender.track.kind === track.kind);
+        senders.replaceTrack(track);
+        //logging connections to see if the track was replaced
+        console.log('Connections after track replacement:', this.pc.getSenders());
     }
 
     SetOnOpenAction = (action) => {
