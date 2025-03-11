@@ -29,7 +29,6 @@ class Player {
         this.#player.setplayingStateChangeAction(() => {
             if (action) action();
             if (this.actor) this.#postEventAction()
-            this.actor = true;
         });
         this.#player.setplayingStateChangeListener();
     }
