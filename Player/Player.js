@@ -72,7 +72,6 @@ class Player {
             this.seekTo(timestamp);
             this.play();
         });
-        this.actor = true;
     }
 
     pauseAt = (timestamp) => {
@@ -80,7 +79,6 @@ class Player {
             this.pause();
             this.seekTo(timestamp);
         });
-        this.actor = true;
     }
 }
 
