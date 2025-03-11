@@ -174,6 +174,13 @@ class PeerEntity {
             case Constants.SELF_ORGANIZING_CONNECTION_REQUEST:
                 await this.CompleteHandshake(event);
                 break;
+            case Constants.CHAT_MESSAGE:
+                window.dispatchEvent(new CustomEvent("MESSAGE:CHAT", { detail: event }));
+                break;
+            case Constants.VIDEO_MESSAGE:
+                console.log("Dispatching MESSAGE:VIDEO event");
+                window.dispatchEvent(new CustomEvent("MESSAGE:VIDEO", { detail: event }));
+                break;
             default:
                 console.log("No listener found:", event);
                 break;
@@ -189,6 +196,8 @@ class PeerEntity {
     }
 
     Broadcast = (message) => {
+        console.log("Broadcasting method message:", message);
+        console.log("Current connections:", this.connections); // Log all connections
         this.connections.forEach(
             connection =>
                 connection.connected

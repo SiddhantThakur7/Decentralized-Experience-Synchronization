@@ -24,6 +24,23 @@ class Extension {
           }
         );
       });
+    
+    document.getElementById("openChat").addEventListener("click", () => {
+      console.log('Opening Chat in extension.js');
+      this.mainPort.postMessage({ event: 'Inject', type: 'chat' });
+    });
+
+    document.getElementById("closeChat").addEventListener("click", () => {
+      this.mainPort.postMessage({ event: 'CloseChat', type: 'chat' });
+    });
+
+    document.getElementById("openVideo").addEventListener("click", async () => {
+      this.mainPort.postMessage({ event: 'InjectVideo', type: 'video' });
+    });
+    
+    document.getElementById("closeVideo").addEventListener("click", () => {
+      this.mainPort.postMessage({ event: 'CloseVideo', type: 'video' });
+    });
   }
 
   eventHandler = (event) => {

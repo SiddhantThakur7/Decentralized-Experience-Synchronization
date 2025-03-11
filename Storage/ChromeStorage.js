@@ -9,7 +9,6 @@ class ChromeStorage {
     setupStorageChannel = () => {
         this.storagePort = chrome.runtime.connect({ name: Constants.MAIN_STORAGE_PORT });
         this.storagePort.postMessage("Connection Established!");
-        // this.storagePort.onMessage.addListener(this.storageEventHandler);
         return this.extensionPort;
     }
 

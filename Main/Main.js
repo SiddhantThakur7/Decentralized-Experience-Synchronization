@@ -1,9 +1,13 @@
 import Constants from "../Constants/Constants.js";
 import PeerEntity from "../Connections/PeerEntity.js";
+import Chat from "../Chat/chat.js";
+import Video from "../Video/video.js";
 
 class Main {
     extensionPort = null;
     peer = null;
+    chatController = null;
+    videoController = null;
 
     constructor() {
         this.setupCommunicationChannels();
@@ -38,6 +42,29 @@ class Main {
             case Constants.EXTENSION_MAIN_CONNECTION_ESTABLISHED:
                 console.log(event);
                 break;
+            case 'Inject':
+                console.log('Injecting chat in Main.js', this.peer.session.sessionId, this.peer.peerId);
+                if (!this.chatController) this.chatController = new Chat(this.peer.session.sessionId, this.peer.peerId);
+                this.chatController.inject();
+                break;
+            case 'CloseChat':
+                console.log('Closing chat in Main.js');
+                if (this.chatController) {
+                    this.chatController.remove();
+                    this.chatController = null;
+                }
+                break;
+            case 'InjectVideo':
+                console.log('Injecting video in Main.js');
+                if (!this.videoController) this.videoController = new Video(this.peer.session.sessionId, this.peer.peerId);
+                this.videoController.inject();
+                break;
+            case 'CloseVideo':
+                console.log('Closing video in Main.js');
+                if (this.videoController) {
+                    this.videoController.remove();
+                    this.videoController = null;
+                }
             default:
                 console.log("No listener found:", event);
                 break;
@@ -53,6 +80,20 @@ class Main {
             case Constants.SESSION_CREATED:
                 this.extensionPort.postMessage(event.detail);
                 window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: event.detail }));
+                break;
+            case Constants.CHAT_MESSAGE:
+                this.peer.Broadcast({
+                    event: Constants.CHAT_MESSAGE,
+                    message: event.detail.message,
+                    originator: this.peer.peerId
+                });
+                break;
+            case Constants.VIDEO_MESSAGE:
+                this.peer.Broadcast({
+                    event: Constants.VIDEO_MESSAGE,
+                    frames: event.detail.frames,
+                    originator: this.peer.peerId
+                });
                 break;
             default:
                 console.log("No listener found:", event);
