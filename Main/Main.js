@@ -43,9 +43,11 @@ class Main {
                 console.log(event);
                 break;
             case 'Inject':
-                console.log('Injecting chat in Main.js', this.peer.session.sessionId, this.peer.peerId);
-                if (!this.chatController) this.chatController = new Chat(this.peer.session.sessionId, this.peer.peerId);
-                this.chatController.inject();
+                chrome.storage.sync.get(['userName'], (result) => {
+                    const userName = result.userName || this.peer.peerId;
+                    if (!this.chatController) this.chatController = new Chat(this.peer.session.sessionId, userName);
+                    this.chatController.inject();
+                });
                 break;
             case 'CloseChat':
                 console.log('Closing chat in Main.js');
