@@ -26,10 +26,10 @@ class Player {
     }
 
     setplayingStateChangeListener = (action) => {
-        this.#player.setplayingStateChangeAction(() => {
+        this.#player.setplayingStateChangeAction((event) => {
+            console.log(event);
             if (action) action();
             if (this.actor) this.#postEventAction()
-            this.actor = true;
         });
         this.#player.setplayingStateChangeListener();
     }
@@ -38,7 +38,6 @@ class Player {
         this.#player.setSeekAction(() => {
             if (action) action();
             if (this.actor) this.#postEventAction();
-            this.actor = true;
         });
         this.#player.setSeekListener();
     }
