@@ -68,17 +68,13 @@ class Player {
     }
 
     playFrom = (timestamp) => {
-        this.disabledActorAction(() => {
-            this.seekTo(timestamp);
-            this.play();
-        });
+        this.seekTo(timestamp);
+        this.play();
     }
 
     pauseAt = (timestamp) => {
-        this.disabledActorAction(() => {
-            this.pause();
-            this.seekTo(timestamp);
-        });
+        this.pause();
+        this.seekTo(timestamp);
     }
 }
 
