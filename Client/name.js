@@ -1,22 +1,34 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const saveNameButton = document.getElementById("saveNameButton");
-  const userNameInput = document.getElementById("userName");
+import ChromeStorage from "../Storage/ChromeStorage.js";
+class Initial {
+  storageClient = null;
+  constructor() {
+    this.storageClient = new ChromeStorage();
+    this.setupEventListeners();
+  }
 
-  // Check if username exists in Chrome storage
-  chrome.storage.sync.get(['userName'], (result) => {
-    if (result.userName) {
+  setupEventListeners = () => {
+    document.getElementById("saveNameButton").addEventListener("click", this.saveName);
+  }
+
+  instantiate = async () => {
+    const userName = await this.storageClient.Get("userName");
+    if (userName) {
       window.location.href = "index.html";
     }
-  });
+  }
 
-  saveNameButton.addEventListener("click", () => {
-    const userName = userNameInput.value.trim();
+  saveName = () => {
+    const userName = document.getElementById("userName").value?.trim();
     if (userName) {
-      chrome.storage.sync.set({ userName: userName }, () => {
-        window.location.href = "index.html";
-      });
+      this.storageClient.Set('userName', userName);
+      window.location.href = "index.html";
     } else {
       alert("Please enter your name.");
     }
-  });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const initial = new Initial();
+  await initial.instantiate();
 });

@@ -29,9 +29,8 @@ class Extension {
       const localDescriptionInput = document.getElementById('local-description');
       localDescriptionInput.select();
       document.execCommand('copy');
-      alert('Text copied to clipboard');
     });
-    
+
     document.getElementById("openChat").addEventListener("click", () => {
       console.log('Opening Chat in extension.js');
       this.mainPort.postMessage({ event: 'Inject', type: 'chat' });
@@ -44,11 +43,11 @@ class Extension {
     document.getElementById("openVideo").addEventListener("click", async () => {
       this.mainPort.postMessage({ event: 'InjectVideo', type: 'video' });
     });
-    
+
     document.getElementById("closeVideo").addEventListener("click", () => {
       this.mainPort.postMessage({ event: 'CloseVideo', type: 'video' });
     });
-    
+
   }
 
   eventHandler = (event) => {

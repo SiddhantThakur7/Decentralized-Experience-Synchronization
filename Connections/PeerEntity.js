@@ -67,8 +67,9 @@ class PeerEntity {
 
     CreateConnectionRequest = async (isPrimary = false, suffix) => {
         const connectionEntity = new PeerConnectionEntity(isPrimary);
+        const current = this.connections.length;
         connectionEntity
-            .SetChannelOnOpenAction(this.channelOnOpenHandler)
+            .SetChannelOnOpenAction(async () => await this.channelOnOpenHandler(connectionEntity, current))
             .SetChannelOnMessageAction(this.channelOnMessageHandler)
             .SetChannelOnCloseAction(this.channelOnCloseHandler);
         const offer = await connectionEntity.Offer(this.peerId, suffix)
@@ -125,8 +126,9 @@ class PeerEntity {
 
     CreateConnectionResponse = async (remoteSdp, isPrimary = false) => {
         const connectionEntity = new PeerConnectionEntity(isPrimary);
+        const current = this.connections.length;
         connectionEntity
-            .SetChannelOnOpenAction(this.channelOnOpenHandler)
+            .SetChannelOnOpenAction(async () => await this.channelOnOpenHandler(connectionEntity, current))
             .SetChannelOnMessageAction(this.channelOnMessageHandler)
             .SetChannelOnCloseAction(this.channelOnCloseHandler);
         const answer = await connectionEntity.Answer(JSON.parse(remoteSdp));
@@ -141,13 +143,14 @@ class PeerEntity {
     }
 
     //Event Handlers
-    channelOnOpenHandler = async () => {
+    channelOnOpenHandler = async (connectionEntity, index) => {
+        console.log(connectionEntity, index);
         this.connectedCount += 1;
         console.log("Channel Opened!");
         if (this.isPrimary) {
             await Utils.sleep(5000);
             window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
-            if (this.isPrimary) this.sendSelfOrganizingOfferRequests();
+            if (this.isPrimary) this.sendSelfOrganizingOfferRequests(connectionEntity, index);
         } else {
             window.dispatchEvent(new CustomEvent("MESSAGE:CLIENT", { detail: { event: Constants.PEER_CONNECTED, getStatus: this.isPrimary } }));
         }
@@ -221,32 +224,32 @@ class PeerEntity {
             console.log("No stream to broadcast.");
             return;
         }
-    
+
         console.log("Broadcasting stream to peers:", stream.getVideoTracks()[0]);
         this.connections.forEach(connection => {
             if (connection.connected) {
                 console.log("Connection video track before replacing:", connection.peerConnection.getSenders().find(s => s.track.kind === 'video').track);
                 connection.replaceTrack(stream.getVideoTracks()[0]);
             }
-        });     
+        });
     };
 
     setupTrackListener = (peerConnection) => {
         if (!peerConnection) return;
         console.log("Setting up track listener on peerConnection:", peerConnection.getSenders());
-        
+
         // Ensure trackedReceivers is initialized
         this.trackedReceivers = this.trackedReceivers || [];
-        
+
         peerConnection.ontrack = (event) => {
             console.log("Received remote track:", event.track);
             //console.log("Received remote stream:", event.streams[0]);
-            
+
             window.dispatchEvent(new CustomEvent("MESSAGE:VIDEO", {
                 detail: { stream: event.streams[0] }
             }));
         };
-        
+
         // Periodically check for new tracks
         setInterval(() => {
             peerConnection.getReceivers().forEach(receiver => {
@@ -255,7 +258,7 @@ class PeerEntity {
                     console.log("New track added:", receiver.track);
                 }
             });
-        }, 1000); 
+        }, 1000);
     };
 
     stopBroadcastStream = () => {
@@ -269,14 +272,12 @@ class PeerEntity {
     }
 
     //Self-Organization Methods
-    sendSelfOrganizingOfferRequests = () => {
-        for (let i = 1; i < this.connections.length; i++) {
-            if (!this.connections[i].connected) continue;
-            this.connections[i].Send({
-                event: Constants.SELF_ORGANIZING_OFFER_REQUEST,
-                connectionIndex: i
-            });
-        }
+    sendSelfOrganizingOfferRequests = (connectionEntity, index) => {
+        if (!connectionEntity.connected) return;
+        connectionEntity.Send({
+            event: Constants.SELF_ORGANIZING_OFFER_REQUEST,
+            connectionIndex: index
+        });
     }
 
     sendSelfOrganizingAnswerRequests = (offers, connectionIndex) => {
