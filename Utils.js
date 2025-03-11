@@ -8,7 +8,7 @@ class Utils {
             let result = callback();
             if (result)
                 return result;
-            await sleep(i * 500);
+            await this.sleep(i * 500);
         }
         console.log("All retry attempts exhausted!");
     }
