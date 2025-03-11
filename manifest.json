@@ -5,7 +5,7 @@
   "manifest_version": 3,
   "author": "Mesh",
   "action": {
-    "default_popup": "Client/index.html",
+    "default_popup": "Client/name.html",
     "default_title": "Capstone Project"
   },
   "background": {
