@@ -26,10 +26,10 @@ class Player {
     }
 
     setplayingStateChangeListener = (action) => {
-        this.#player.setplayingStateChangeAction((event) => {
-            console.log(event);
+        this.#player.setplayingStateChangeAction(() => {
             if (action) action();
             if (this.actor) this.#postEventAction()
+            this.actor = true;
         });
         this.#player.setplayingStateChangeListener();
     }
@@ -38,6 +38,7 @@ class Player {
         this.#player.setSeekAction(() => {
             if (action) action();
             if (this.actor) this.#postEventAction();
+            this.actor = true;
         });
         this.#player.setSeekListener();
     }
@@ -67,17 +68,15 @@ class Player {
     }
 
     playFrom = (timestamp) => {
-        this.disabledActorAction(() => {
-            this.seekTo(timestamp);
-            this.play();
-        });
+        this.seekTo(timestamp);
+        this.play();
+        this.actor = true;
     }
 
     pauseAt = (timestamp) => {
-        this.disabledActorAction(() => {
-            this.pause();
-            this.seekTo(timestamp);
-        });
+        this.pause();
+        this.seekTo(timestamp);
+        this.actor = true;
     }
 }
 
